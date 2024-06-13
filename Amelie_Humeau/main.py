@@ -7,6 +7,7 @@ import Correction as correction
 import rescale
 import tri
 import stitch
+import histogramme as h
 from PIL import Image, ImageTk
 
 class FileEntry(ttk.Frame):
@@ -99,7 +100,7 @@ class ImageProcessor:
                     if self.cancelled:
                         self.cleanup("Traitement annulé.")
                         return
-
+                    
                 self.processing = True
                 self.status_label.config(text="Création des panoramas en cours...")
                 self.progress_bar.start()
@@ -114,6 +115,11 @@ class ImageProcessor:
                     rescale.main(os.path.join(dest_path,"panoramas"),test = True,flou = blur_value)
                 else:
                     rescale.main(os.path.join(dest_path,"panoramas"),test = True)
+
+                self.status_label.config(text="Egalisation en cours...")
+                print("avant")
+                h.main(os.path.join(dest_path,"panoramas"))
+                print("après")
 
                 self.status_label.config(text="Terminé.")
                 self.progress_bar.stop()

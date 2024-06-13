@@ -34,9 +34,25 @@ def check_bande(chemin):
         return "730nm"
     else : 
         return "850nm" 
+    
+def EraseFolder(repertoire):
+    import os
+
+    files=os.listdir(repertoire)
+    for i in range(0,len(files)):
+        os.remove(repertoire+'/'+files[i])
+
+    #ligne additionnelle si on veut suppimer le repertoire
+    os.removedirs(repertoire)
+
 def main(path_folder):
 
+    if os.path.exists(path_folder + "/panoramas"):
+        EraseFolder(path_folder + "/panoramas")
+    
+
     folders = glob.glob(path_folder + "/*")
+
     for folder in folders:
         images = glob.glob(folder + "/*.tif")
         bande = check_bande(images[0])
@@ -50,6 +66,7 @@ def main(path_folder):
         
             if not os.path.exists(path_folder + "/panoramas"):
                 os.makedirs(path_folder + "/panoramas")
+            
             cv2.imwrite(path_folder + "/panoramas/" + bande + ".tif", result)
             # plt.imshow(result,cmap="gray")
             # plt.show()
