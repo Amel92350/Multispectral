@@ -90,10 +90,7 @@ class ImageProcessor:
         panorama_path = self.panorama_pathentry.get_path()
 
         # Copie les images sources dans un nouveau dossier pour le traitement
-        new_src_path = os.path.join(src_path, "copied_images")
-        if os.path.exists(new_src_path):
-            shutil.rmtree(new_src_path)
-        shutil.copytree(src_path, new_src_path)
+        
 
         if apply_blur:
             blur_value = int(self.blur_value.get())
@@ -104,6 +101,10 @@ class ImageProcessor:
             """
             try:
                 if process_type == "full":
+                    new_src_path = os.path.join(src_path, "copied_images")
+                    if os.path.exists(new_src_path):
+                        shutil.rmtree(new_src_path)
+                    shutil.copytree(src_path, new_src_path)
                     self.processing = True
                     self.status_label.config(text="Correction en cours...")
                     self.progress_bar.start()

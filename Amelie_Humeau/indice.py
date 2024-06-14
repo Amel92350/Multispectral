@@ -1,7 +1,6 @@
 import cv2
 import glob
 import os
-import matplotlib.pyplot as plt
 
 
 def calcul(panoramaA,panoramaB,ajustement=0):

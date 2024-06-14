@@ -6,6 +6,7 @@ Created on Mon Jul 12 09:33:57 2021
 """
 
 import cv2 as cv
+import glob
 
 def Openimage(path, long=[], haut=[]):
     """
@@ -164,3 +165,37 @@ def mediane(images, kernel):
     for path in images:
         print("ok")
         img = cv.imread(path)
+        img_2 = cv.medianBlur(img,kernel)
+        cv.imwrite(path,img_2)
+
+    
+
+
+##### main #####
+
+def main(path,test = False,flou = None):
+
+    """
+    Entrez le chemin absolue du dossier dans lequel 
+    se trouve les images, suivie de /*/*.tif
+    """
+
+    if test:
+
+        images = glob.glob(path+ "/*.tif")
+        if flou is not None:
+            mediane(images,flou)
+        print(images)
+        resize_images_to_common_dimensions(images)
+        align_img(images)        
+
+        return 0
+    files = glob.glob(path)
+
+    for file in files:
+        images = glob.glob(file+"/*.tif")          
+        resize_images_to_common_dimensions(images)
+        align_img(images)
+
+if __name__ == "__main__" : 
+    main("C:/Users/AHUMEAU/Desktop/donnees_triees/panoramas",test = True)

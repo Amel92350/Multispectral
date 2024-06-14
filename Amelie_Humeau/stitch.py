@@ -104,4 +104,4 @@ def main(path_folder):
             print(f"Échec de la génération du panorama code erreur : {status}")
 
 if __name__ == "__main__":
-    main("C:/Users/AHUMEAU/Desktop/donnees_triees")
+    main("C:/Users/AHUMEAU/Desktop/donnees_triees_test")
