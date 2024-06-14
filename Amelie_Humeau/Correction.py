@@ -9,7 +9,7 @@ def Openimage(path):
     '''
     Fonction qui prend en argument le chemin d'une image
     et qui renvoie le chemin absolu ainsi que la matrice
-    qui représente l'image
+    qui représente l'image.
     '''
     tmp = Image.open(path)
     img = np.array(tmp)
@@ -20,7 +20,7 @@ def Openimage(path):
 def convert12to8(img):
     """
     Fonction qui prend en argument une matrice représentant une
-    image et qui renvoie une matrice qui représente l'image en 8 bits
+    image et qui renvoie une matrice qui représente l'image en 8 bits.
     """
     minim = np.amin(img)
     maxi = np.amax(img)
@@ -29,7 +29,7 @@ def convert12to8(img):
 
 def get_file_matrice(bande):
     """
-    Fonction qui crée une matrice de coefficients de distorsion et une matrice de paramètres intrinsèques
+    Fonction qui crée une matrice de coefficients de distorsion et une matrice de paramètres intrinsèques.
     ENTREE : une chaîne de caractères (bande) qui contient la bande dont on veut les matrices (ex : '450nm')
     SORTIE : deux matrices dans un tuple (dist, mtx)
     """
@@ -55,6 +55,14 @@ def get_file_matrice(bande):
     return dist, mtx
 
 def undistort_bande(img_bande, mtx, dist, roi, new_camera_mtx):
+    """
+    Fonction qui applique la correction de distorsion sur une bande d'images.
+    :param img_bande: Liste des tuples (image, chemin) pour une bande spécifique
+    :param mtx: Matrice des paramètres intrinsèques
+    :param dist: Matrice des coefficients de distorsion
+    :param roi: Région d'intérêt de la nouvelle caméra
+    :param new_camera_mtx: Nouvelle matrice de la caméra après correction
+    """
     for img, path in img_bande:
         dst = cv.undistort(img, mtx, dist, None, new_camera_mtx)
         dst = convert12to8(dst)
@@ -62,11 +70,10 @@ def undistort_bande(img_bande, mtx, dist, roi, new_camera_mtx):
         dst = dst[y:y + h, x:x + w]
         cv.imwrite(path, dst)
 
-
 def main(chemin):
     """
-    Entrez le chemin absolu du dossier dans lequel 
-    se trouvent les images, suivi de /*/*.tif    
+    Fonction principale qui gère le processus de correction des images.
+    :param chemin: Chemin absolu du dossier contenant les images, suivi de /*/*.tif
     """
     images = glob.glob(os.path.join(chemin, "*.tif"))
     images_dict = defaultdict(list)

@@ -13,13 +13,16 @@ import shutil
 
 class FileEntry(ttk.Frame):
     """
-    Classe permettant l'entrée d'un dossier avec une Entry
+    Classe permettant l'entrée d'un dossier avec une Entry et un bouton pour parcourir les dossiers.
     """
     def __init__(self, master=None, **kw):
         super().__init__(master)
         self.init_widgets(**kw)
 
     def init_widgets(self, **kw):
+        """
+        Initialise les widgets de la classe FileEntry.
+        """
         self.label = ttk.Label(
             self,
             text=kw.get(
@@ -44,15 +47,23 @@ class FileEntry(ttk.Frame):
         self.button.pack(side=tk.LEFT, expand=0, fill=tk.NONE, padx=5)
 
     def slot_browse(self, tk_event=None, *args, **kw):
+        """
+        Ouvre une boîte de dialogue pour sélectionner un dossier.
+        """
         _fpath = filedialog.askdirectory()
         self.folder_path.set(_fpath)
 
     def get_path(self):
+        """
+        Retourne le chemin du dossier sélectionné.
+        """
         return self.folder_path.get()
 
-
 class ImageProcessor:
-    def __init__(self, src_pathentry, dest_pathentry, panorama_pathentry, status_label, progress_bar,flou_var,blur_value):
+    """
+    Classe pour traiter les images en fonction des différents processus définis.
+    """
+    def __init__(self, src_pathentry, dest_pathentry, panorama_pathentry, status_label, progress_bar, flou_var, blur_value):
         self.src_pathentry = src_pathentry
         self.dest_pathentry = dest_pathentry
         self.panorama_pathentry = panorama_pathentry
@@ -63,68 +74,54 @@ class ImageProcessor:
         self.flou_var = flou_var
         self.blur_value = blur_value
 
-
     def is_processing(self):
+        """
+        Retourne True si un traitement est en cours.
+        """
         return self.processing
 
     def start_processing(self, process_type):
+        """
+        Démarre le traitement des images en fonction du type de processus spécifié (full ou panoramas).
+        """
         src_path = self.src_pathentry.get_path()
         dest_path = self.dest_pathentry.get_path()
         apply_blur = self.flou_var.get()
         panorama_path = self.panorama_pathentry.get_path()
 
-        new_src_path = os.path.join(src_path,"copied_images")
+        # Copie les images sources dans un nouveau dossier pour le traitement
+        new_src_path = os.path.join(src_path, "copied_images")
         if os.path.exists(new_src_path):
             shutil.rmtree(new_src_path)
-        shutil.copytree(src_path,new_src_path)  
-        
+        shutil.copytree(src_path, new_src_path)
+
         if apply_blur:
             blur_value = int(self.blur_value.get())
+
         def process():
+            """
+            Fonction de traitement des images exécutée dans un thread séparé.
+            """
             try:
-                if(process_type == "full"):
+                if process_type == "full":
                     self.processing = True
                     self.status_label.config(text="Correction en cours...")
                     self.progress_bar.start()
                     correction.main(os.path.join(new_src_path, "*"))
-                    
-                    if self.cancelled:
-                        self.cleanup("Traitement annulé.")
-                        return
-                    
-                    # self.status_label.config(text="Redimensionnement en cours...")
-                    # if apply_blur:
-                    #     rescale.main(os.path.join(src_path, "*"),flou = blur_value)
-                    # else:
-                    #     rescale.main(os.path.join(src_path, "*"))
-
-                    if self.cancelled:
-                        self.cleanup("Traitement annulé.")
-                        return
 
                     self.status_label.config(text="Tri en cours...")
                     tri.main(new_src_path, dest_path)
 
-                    if self.cancelled:
-                        self.cleanup("Traitement annulé.")
-                        return
-                    
                 self.processing = True
                 self.status_label.config(text="Création des panoramas en cours...")
                 self.progress_bar.start()
                 stitch.main(dest_path)
 
-                if self.cancelled:
-                        self.cleanup("Traitement annulé.")
-                        return
-                
                 self.status_label.config(text="Redimensionnement en cours...")
                 if apply_blur:
-                    rescale.main(os.path.join(dest_path,"panoramas"),test = True,flou = blur_value)
+                    rescale.main(os.path.join(dest_path, "panoramas"), test=True, flou=blur_value)
                 else:
-                    rescale.main(os.path.join(dest_path,"panoramas"),test = True)
-
-                
+                    rescale.main(os.path.join(dest_path, "panoramas"), test=True)
 
                 self.status_label.config(text="Terminé.")
                 self.progress_bar.stop()
@@ -137,42 +134,40 @@ class ImageProcessor:
 
         Thread(target=process).start()
 
-    def process_index(self,Ic):
+    def process_index(self, Ic):
+        """
+        Démarre le traitement d'indice spécifié.
+        """
         panorama_path = self.panorama_pathentry.get_path()
 
         def process():
+            """
+            Fonction de traitement des indices exécutée dans un thread séparé.
+            """
             try:
-
                 self.processing = True
                 self.status_label.config(text="Traitement des panoramas en cours...")
                 self.progress_bar.start()
-    
-                indice.main(panorama_path,Ic)
-                self.status_label.config(text="Egalisation en cours...")
-                
 
-                
-                if (Ic == "text"):
-                    h.main(os.path.join(panorama_path,"rv.tif"))
-                    # self.show_result_image(os.path.join(panorama_path, "rv.tif"),Ic)
-                    # messagebox.showinfo("Information", "Indice de texture calculé.")
-                elif (Ic == "sal"):
-                    h.main(os.path.join(panorama_path,"sal.tif"))
-                    # self.show_result_image(os.path.join(panorama_path,"sal.tif"),Ic)
-                    # messagebox.showinfo("Information", "Indice de salinité calculé.")
-                elif (Ic == "org"):
-                    h.main(os.path.join(panorama_path,"org.tif"))
-                    # self.show_result_image(os.path.join(panorama_path,"org.tif"),Ic)
-                    # messagebox.showinfo("Information", "Indice de matière organique calculé.")
-                elif (Ic == "savi"):
-                    h.main(os.path.join(panorama_path,"savi.tif"))
-                    # self.show_result_image(os.path.join(panorama_path,"savi.tif"),Ic)
-                    # messagebox.showinfo("Information", "Indice de végétation calculé.")
-            
+                indice.main(panorama_path, Ic)
+                self.status_label.config(text="Egalisation en cours...")
+
+                if Ic == "text":
+                    h.main(os.path.join(panorama_path, "rv.tif"))
+                    messagebox.showinfo("Information", "Indice de texture calculé.")
+                elif Ic == "sal":
+                    h.main(os.path.join(panorama_path, "sal.tif"))
+                    messagebox.showinfo("Information", "Indice de salinité calculé.")
+                elif Ic == "org":
+                    h.main(os.path.join(panorama_path, "org.tif"))
+                    messagebox.showinfo("Information", "Indice de matière organique calculé.")
+                elif Ic == "savi":
+                    h.main(os.path.join(panorama_path, "savi.tif"))
+                    messagebox.showinfo("Information", "Indice de végétation calculé.")
+
                 self.status_label.config(text="Traitement terminé.")
                 self.progress_bar.stop()
                 self.processing = False
-                
 
             except Exception as e:
                 self.progress_bar.stop()
@@ -181,38 +176,38 @@ class ImageProcessor:
 
         Thread(target=process).start()
 
-    def show_result_image(self, image_path,Ic):
-        # Charger l'image avec PIL
+    def show_result_image(self, image_path, Ic):
+        """
+        Affiche l'image résultat dans une nouvelle fenêtre.
+        """
         img = Image.open(image_path)
-
         img = img.resize((800, 600))
 
-        # Créer une fenêtre Tkinter pour afficher l'image
         image_window = tk.Toplevel()
-        if (Ic == "text"):
+        if Ic == "text":
             image_window.title("Indice de texture des sols")
-        elif (Ic == "sal"):
+        elif Ic == "sal":
             image_window.title("Indice de salinité")
-        elif (Ic == "org"):
+        elif Ic == "org":
             image_window.title("Indice de matière organique")
-        elif (Ic == "savi"):
+        elif Ic == "savi":
             image_window.title("Indice de végétation ajusté pour le sol")
 
-        # Convertir l'image PIL en un format Tkinter compatible
         img_tk = ImageTk.PhotoImage(img)
-
-        # Afficher l'image dans un widget Label Tkinter
         label = tk.Label(image_window, image=img_tk)
         label.pack()
-
-        # Nécessaire pour éviter que l'image ne soit libérée de la mémoire trop tôt
         label.image = img_tk
 
     def cancel_processing(self):
+        """
+        Annule le traitement en cours.
+        """
         self.cancelled = True
 
 def init_root():
-
+    """
+    Initialise la fenêtre principale de l'application.
+    """
     root = tk.Tk()
     root.title("Logiciel de traitement d'images multispectrales")
     root.geometry("800x600")
@@ -222,7 +217,6 @@ def init_root():
 
     file_menu = tk.Menu(menu_bar, tearoff=0)
     menu_bar.add_cascade(label="Fichier", menu=file_menu)
-    
 
     labelframe = ttk.LabelFrame(
         root,
@@ -232,7 +226,7 @@ def init_root():
 
     src_pathentry = FileEntry(labelframe, label="Dossier source : ")
     dest_pathentry = FileEntry(labelframe, label="Dossier destination : ")
-    panoramas_pathentry = FileEntry(labelframe, label = "Dossier des panoramas")
+    panoramas_pathentry = FileEntry(labelframe, label="Dossier des panoramas")
 
     status_frame = ttk.LabelFrame(
         labelframe,
@@ -249,33 +243,34 @@ def init_root():
     flou_frame = ttk.Frame(labelframe)
     flou_frame.pack(side=tk.TOP, expand=0, fill=tk.X, padx=5)
 
-    # Variable pour stocker l'état de la checkbox
     flou_var = tk.BooleanVar()
 
-    # Fonction pour afficher ou masquer l'Entry
     def toggle_blur_entry():
+        """
+        Affiche ou masque l'Entry pour la valeur du flou en fonction de l'état de la checkbox.
+        """
         if flou_var.get():
             blur_entry.pack(side=tk.LEFT, expand=0, padx=5)
         else:
             blur_entry.pack_forget()
 
     blur_value = tk.StringVar()
-    blur_entry = ttk.Entry(flou_frame,textvariable=blur_value)
+    blur_entry = ttk.Entry(flou_frame, textvariable=blur_value)
 
-    # Checkbox pour appliquer le flou
     flou_checkbox = ttk.Checkbutton(
         flou_frame,
         text="Appliquer le flou",
         variable=flou_var,
-        command=toggle_blur_entry 
+        command=toggle_blur_entry
     )
     flou_checkbox.pack(expand=0, fill=tk.X)
 
-
-
-    processor = ImageProcessor(src_pathentry, dest_pathentry, panoramas_pathentry, status_label, progress_bar,flou_var,blur_value)
+    processor = ImageProcessor(src_pathentry, dest_pathentry, panoramas_pathentry, status_label, progress_bar, flou_var, blur_value)
 
     def quit_app():
+        """
+        Quitte l'application si aucun traitement n'est en cours.
+        """
         if not processor.is_processing():
             root.quit()
         else:
@@ -285,16 +280,15 @@ def init_root():
     action_menu = tk.Menu(menu_bar, tearoff=0)
     menu_bar.add_cascade(label="Actions", menu=action_menu)
     action_menu.add_command(label="Lancer le traitement complet", command=lambda: processor.start_processing("full"))
-    action_menu.add_command(label = "Créer des panoramas", command = lambda: processor.start_processing("panoramas"))
-    action_menu.add_command(label = "Annuler",command = processor.cancel_processing)
+    action_menu.add_command(label="Créer des panoramas", command=lambda: processor.start_processing("panoramas"))
+    action_menu.add_command(label="Annuler", command=processor.cancel_processing)
 
-    indice_menu = tk.Menu(menu_bar,tearoff=0)
-    menu_bar.add_cascade(label = "Indices",menu = indice_menu)
-    indice_menu.add_command(label="Indice de texture des sols", command=lambda : processor.process_index("text"))
-    indice_menu.add_command(label="Indice de salinité", command=lambda : processor.process_index("sal"))
-    indice_menu.add_command(label="Indice de matière organique", command=lambda : processor.process_index("org"))
-    indice_menu.add_command(label="Indice de végétation ajusté pour le sol", command=lambda : processor.process_index("savi"))
-    
+    indice_menu = tk.Menu(menu_bar, tearoff=0)
+    menu_bar.add_cascade(label="Indices", menu=indice_menu)
+    indice_menu.add_command(label="Indice de texture des sols", command=lambda: processor.process_index("text"))
+    indice_menu.add_command(label="Indice de salinité", command=lambda: processor.process_index("sal"))
+    indice_menu.add_command(label="Indice de matière organique", command=lambda: processor.process_index("org"))
+    indice_menu.add_command(label="Indice de végétation ajusté pour le sol", command=lambda: processor.process_index("savi"))
 
     src_pathentry.pack(expand=0, fill=tk.X)
     dest_pathentry.pack(expand=0, fill=tk.X)
@@ -302,17 +296,16 @@ def init_root():
     status_frame.pack(side=tk.BOTTOM, expand=1, fill=tk.X, padx=5, pady=5)
     labelframe.pack(side=tk.TOP, expand=1, fill=tk.BOTH, padx=5, pady=5)
 
-    
-
     ttk.Sizegrip(root).pack(side=tk.RIGHT, expand=0, fill=tk.Y, padx=5, pady=5)
 
     return root
 
 def main():
+    """
+    Point d'entrée principal de l'application.
+    """
     root = init_root()
     root.mainloop()
-
-
 
 if __name__ == '__main__':
     main()
