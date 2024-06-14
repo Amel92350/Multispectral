@@ -9,6 +9,7 @@ import tri
 import stitch
 import histogramme as h
 from PIL import Image, ImageTk
+import shutil
 
 class FileEntry(ttk.Frame):
     """
@@ -62,6 +63,7 @@ class ImageProcessor:
         self.flou_var = flou_var
         self.blur_value = blur_value
 
+
     def is_processing(self):
         return self.processing
 
@@ -70,6 +72,12 @@ class ImageProcessor:
         dest_path = self.dest_pathentry.get_path()
         apply_blur = self.flou_var.get()
         panorama_path = self.panorama_pathentry.get_path()
+
+        new_src_path = os.path.join(src_path,"copied_images")
+        if os.path.exists(new_src_path):
+            shutil.rmtree(new_src_path)
+        shutil.copytree(src_path,new_src_path)  
+        
         if apply_blur:
             blur_value = int(self.blur_value.get())
         def process():
@@ -78,7 +86,7 @@ class ImageProcessor:
                     self.processing = True
                     self.status_label.config(text="Correction en cours...")
                     self.progress_bar.start()
-                    correction.main(os.path.join(src_path, "*"))
+                    correction.main(os.path.join(new_src_path, "*"))
                     
                     if self.cancelled:
                         self.cleanup("Traitement annulé.")
@@ -95,7 +103,7 @@ class ImageProcessor:
                         return
 
                     self.status_label.config(text="Tri en cours...")
-                    tri.main(src_path, dest_path)
+                    tri.main(new_src_path, dest_path)
 
                     if self.cancelled:
                         self.cleanup("Traitement annulé.")
@@ -116,10 +124,7 @@ class ImageProcessor:
                 else:
                     rescale.main(os.path.join(dest_path,"panoramas"),test = True)
 
-                self.status_label.config(text="Egalisation en cours...")
-                print("avant")
-                h.main(os.path.join(dest_path,"panoramas"))
-                print("après")
+                
 
                 self.status_label.config(text="Terminé.")
                 self.progress_bar.stop()
@@ -143,23 +148,32 @@ class ImageProcessor:
                 self.progress_bar.start()
     
                 indice.main(panorama_path,Ic)
+                self.status_label.config(text="Egalisation en cours...")
+                
 
+                
+                if (Ic == "text"):
+                    h.main(os.path.join(panorama_path,"rv.tif"))
+                    # self.show_result_image(os.path.join(panorama_path, "rv.tif"),Ic)
+                    # messagebox.showinfo("Information", "Indice de texture calculé.")
+                elif (Ic == "sal"):
+                    h.main(os.path.join(panorama_path,"sal.tif"))
+                    # self.show_result_image(os.path.join(panorama_path,"sal.tif"),Ic)
+                    # messagebox.showinfo("Information", "Indice de salinité calculé.")
+                elif (Ic == "org"):
+                    h.main(os.path.join(panorama_path,"org.tif"))
+                    # self.show_result_image(os.path.join(panorama_path,"org.tif"),Ic)
+                    # messagebox.showinfo("Information", "Indice de matière organique calculé.")
+                elif (Ic == "savi"):
+                    h.main(os.path.join(panorama_path,"savi.tif"))
+                    # self.show_result_image(os.path.join(panorama_path,"savi.tif"),Ic)
+                    # messagebox.showinfo("Information", "Indice de végétation calculé.")
+            
                 self.status_label.config(text="Traitement terminé.")
                 self.progress_bar.stop()
                 self.processing = False
-                if (Ic == "text"):
-                    self.show_result_image(os.path.join(panorama_path, "rv.tif"),Ic)
-                    messagebox.showinfo("Information", "Indice de texture calculé.")
-                elif (Ic == "sal"):
-                    self.show_result_image(os.path.join(panorama_path,"sal.tif"),Ic)
-                    messagebox.showinfo("Information", "Indice de salinité calculé.")
-                elif (Ic == "org"):
-                    self.show_result_image(os.path.join(panorama_path,"org.tif"),Ic)
-                    messagebox.showinfo("Information", "Indice de matière organique calculé.")
-                elif (Ic == "savi"):
-                    self.show_result_image(os.path.join(panorama_path,"savi.tif"),Ic)
-                    messagebox.showinfo("Information", "Indice de végétation calculé.")
                 
+
             except Exception as e:
                 self.progress_bar.stop()
                 self.processing = False

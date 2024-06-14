@@ -37,8 +37,9 @@ def decaler_histogramme(img,nb):
     return new_img
 
 def main(input_folder):
+    print(input_folder)
     print("pendant")
-    image_paths = glob.glob(os.path.join(input_folder, "*.tif"))
+    image_paths = glob.glob(input_folder)
     print(image_paths)
     for path in image_paths:
         print(path)
