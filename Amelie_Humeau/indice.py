@@ -1,6 +1,7 @@
 import cv2
 import glob
 import os
+import histogramme as h
 
 
 def calcul(panoramaA,panoramaB,ajustement=0):
@@ -79,20 +80,24 @@ def main(panoramas_path,Ic="text"):
 
     if Ic == "text":
         divided = rv(panorama_r,panorama_v)
+        divided = h.etirer_min_max(divided)
         cv2.imwrite(os.path.join(panoramas_path, "rv.tif"), divided)
 
     elif Ic == "sal":
         divided = sal(panorama_swir,panorama_v)
+        divided = h.etirer_min_max(divided)
         cv2.imwrite(os.path.join(panoramas_path, "sal.tif"), divided)
     
     elif Ic == "org":
         divided = org(panorama_r, panorama_nir)
+        divided = h.etirer_min_max(divided)
         cv2.imwrite(os.path.join(panoramas_path,"org.tif"),divided)
     
     elif Ic == "savi":
         divided = SAVI(panorama_r,panorama_nir)
+        # divided = h.etirer_min_max(divided)
         cv2.imwrite(os.path.join(panoramas_path,"savi.tif"),divided)
 
 
 if __name__ == "__main__":
-    main("C:/Users/AHUMEAU/Desktop/donnees_triees/panoramas",Ic = "sal")
+    main("C:/Users/AHUMEAU/Desktop/Pontcharaud/donnees_triees_groupe2/test",Ic = "savi")

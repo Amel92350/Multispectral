@@ -60,20 +60,33 @@ def decaler_histogramme(img, nb):
     
     return new_img
 
+def get_indice_max(tab):
+    i_max =-1
+
+    for i in range(0,len(tab)-1):
+        if(tab[i]!=0)and tab[i]>500:
+            i_max = i
+
+    return i_max
+def etirer_min_max(img):
+    new_img = np.zeros_like(img)
+    hist = calculer_histogramme(img)
+    max_v = get_indice_max(hist)
+    min_v = 0
+    
+    for i in range(img.shape[0]):
+        for j in range(img.shape[1]):
+            new_img[i,j] = 255*((img[i,j]-min_v)/max_v-min_v)
+    return new_img
+
 def main(input_folder):
-    """
-    Applique l'égalisation d'histogramme à toutes les images du dossier donné.
-    :param input_folder: Chemin du dossier contenant les images
-    """
-    print(input_folder)
-    print("pendant")
-    image_paths = glob.glob(input_folder)
-    print(image_paths)
-    for path in image_paths:
-        print(path)
-        img = cv2.imread(path)
-        img_eq = egaliser(img)
-        cv2.imwrite(path, img_eq)
+    
+    images = glob.glob(input_folder + "/*.tif")
+    for image in images:
+        img = cv2.imread(image)
+        img_etiree = etirer_min_max(img)
+        cv2.imwrite(image,img_etiree)
+
 
 def main_dec(input_folder, nb):
     """
@@ -86,6 +99,7 @@ def main_dec(input_folder, nb):
         print(path)
         img = cv2.imread(path)
         img_dec = decaler_histogramme(img, nb)
+
         cv2.imwrite(path, img_dec)
 
 def normalisation_images(input_folder):
@@ -119,4 +133,4 @@ def test_histogramme():
     plt.show()    
 
 if __name__ == "__main__":
-    main("C:/Users/AHUMEAU/Desktop/donnees_triees")
+    main("C:/Users/AHUMEAU/Desktop/Pontcharaud/donnees_triees_groupe5/panoramas")

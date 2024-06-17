@@ -112,6 +112,7 @@ class ImageProcessor:
 
                     self.status_label.config(text="Tri en cours...")
                     tri.main(new_src_path, dest_path)
+                    
 
                 self.processing = True
                 self.status_label.config(text="Création des panoramas en cours...")
@@ -154,16 +155,16 @@ class ImageProcessor:
                 self.status_label.config(text="Egalisation en cours...")
 
                 if Ic == "text":
-                    h.main(os.path.join(panorama_path, "rv.tif"))
+                    # h.main(os.path.join(panorama_path, "rv.tif"))
                     messagebox.showinfo("Information", "Indice de texture calculé.")
                 elif Ic == "sal":
-                    h.main(os.path.join(panorama_path, "sal.tif"))
+                    # h.main(os.path.join(panorama_path, "sal.tif"))
                     messagebox.showinfo("Information", "Indice de salinité calculé.")
                 elif Ic == "org":
-                    h.main(os.path.join(panorama_path, "org.tif"))
+                    # h.main(os.path.join(panorama_path, "org.tif"))
                     messagebox.showinfo("Information", "Indice de matière organique calculé.")
                 elif Ic == "savi":
-                    h.main(os.path.join(panorama_path, "savi.tif"))
+                    # h.main(os.path.join(panorama_path, "savi.tif"))
                     messagebox.showinfo("Information", "Indice de végétation calculé.")
 
                 self.status_label.config(text="Traitement terminé.")

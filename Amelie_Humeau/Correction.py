@@ -99,4 +99,4 @@ def main(chemin):
         undistort_bande(images_dict[bande], mtx, dist, roi, new_camera_mtx)
 
 if __name__ == "__main__":
-    main("C:/Users/AHUMEAU/Desktop/transfert/Stage/2024 - Copie/*")
+    main("C:/Users/AHUMEAU/Desktop/test/copied_images/*")
