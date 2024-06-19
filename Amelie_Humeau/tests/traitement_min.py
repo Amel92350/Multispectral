@@ -38,4 +38,6 @@ def main(input_folder):
         cv2.imwrite(path,image_8bits)
 
 if __name__ == '__main__':
-    main("C:\\Users\\AHUMEAU\\Desktop\\transfert\\Stage\\2024 - Copie")
+    img = np.array([[0,4095],[2048,1024]])
+    img_8bit = convert12to8(img)
+    print(img,img_8bit)
