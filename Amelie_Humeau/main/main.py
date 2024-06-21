@@ -112,6 +112,7 @@ class ImageProcessor:
 
                     self.status_label.config(text="Tri en cours...")
                     tri.main(new_src_path, dest_path)
+                    h.main(dest_path+"/*")
                     
 
                 self.processing = True

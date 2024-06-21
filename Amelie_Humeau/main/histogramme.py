@@ -55,23 +55,46 @@ def etirer_min_max(img):
     if max_v - min_v == 0:
         return np.ones_like(img) *255
 
+    img_test = img.copy()
     for i in range(img.shape[0]):
         for j in range(img.shape[1]):
-            new_img[i,j] = 255*((img[i,j]-min_v)/max_v-min_v)
+            pixel = 255*((img_test[i,j]-min_v)/(max_v-min_v))
+            for k in range(len(pixel)):
+                pixel[k] = int(pixel[k])
+
+            if pixel.all() == 0:
+                new_img[i,j] = img[i,j-1]
+                new_img[i, j] = np.clip(new_img[i, j], 0, 255)
+            else:
+                new_img[i,j] = pixel
+                new_img[i, j] = np.clip(new_img[i, j], 0, 255)
+    kernel =  np.ones((3,3),np.uint8)
+    new_img = cv2.morphologyEx(new_img,cv2.MORPH_CLOSE,kernel)
+    new_img = cv2.GaussianBlur(new_img,(3,3),0)
     return new_img
 
-def main(input_img):
+
+
+def main(input_folder):
+
+    image_paths = glob.glob(input_folder + "/*.tif")
+    for path in image_paths:
+        print(path)
+        image = cv2.imread(path)
+        etiree = etirer_min_max(image)
+        cv2.imwrite(path,etiree)
+
+def test(input_img):
     """
     Teste etirer min max sur une image
     """
-    img = np.ones((10,10),dtype = np.uint8)*127
+    img = cv2.imread(input_img)
     new_img = etirer_min_max(img)
-    hist_img = calculer_histogramme(img)
-    hist_new_img = calculer_histogramme(new_img)
-    plt.plot(hist_img,'red')
-    plt.plot(hist_new_img,'green')
-    plt.show()
+    cv2.imshow("image" , img)
+    cv2.waitKey(0)
+    cv2.imshow("image etiree",new_img)
+    cv2.waitKey(0)
     
 
 if __name__ == "__main__":
-    main("C:/Users/AHUMEAU/Desktop/Pontcharaud/donnees_triees_groupe5/panoramas/savi.tif")
+    test("C:/Users/AHUMEAU/Desktop/donnees_triees_test/415nm/20210814_092734415nm.tif")
