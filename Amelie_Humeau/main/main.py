@@ -10,6 +10,7 @@ import stitch
 import histogramme as h
 from PIL import Image, ImageTk
 import shutil
+from file_tree_viewer import FileTreeApp
 
 class FileEntry(ttk.Frame):
     """
@@ -63,7 +64,7 @@ class ImageProcessor:
     """
     Classe pour traiter les images en fonction des différents processus définis.
     """
-    def __init__(self, src_pathentry, dest_pathentry, panorama_pathentry, status_label, progress_bar, flou_var, blur_value):
+    def __init__(self, src_pathentry, dest_pathentry, panorama_pathentry, status_label, progress_bar, flou_var, blur_value,tree):
         self.src_pathentry = src_pathentry
         self.dest_pathentry = dest_pathentry
         self.panorama_pathentry = panorama_pathentry
@@ -73,6 +74,7 @@ class ImageProcessor:
         self.cancelled = False
         self.flou_var = flou_var
         self.blur_value = blur_value
+        self.tree=tree
 
     def is_processing(self):
         """
@@ -80,20 +82,22 @@ class ImageProcessor:
         """
         return self.processing
 
+   
+
     def start_processing(self, process_type):
         """
         Démarre le traitement des images en fonction du type de processus spécifié (full ou panoramas).
         """
         src_path = self.src_pathentry.get_path()
         dest_path = self.dest_pathentry.get_path()
+        if not os.path.exists(dest_path):
+            os.makedirs(dest_path)
         apply_blur = self.flou_var.get()
-        panorama_path = self.panorama_pathentry.get_path()
-
-        # Copie les images sources dans un nouveau dossier pour le traitement
-        
+        panorama_path = self.panorama_pathentry.get_path()    
 
         if apply_blur:
             blur_value = int(self.blur_value.get())
+
 
         def process():
             """
@@ -102,6 +106,7 @@ class ImageProcessor:
             try:
                 if process_type == "full":
                     new_src_path = os.path.join(src_path, "copied_images")
+                    # Copie les images sources dans un nouveau dossier pour le traitement
                     if os.path.exists(new_src_path):
                         shutil.rmtree(new_src_path)
                     shutil.copytree(src_path, new_src_path)
@@ -112,7 +117,7 @@ class ImageProcessor:
 
                     self.status_label.config(text="Tri en cours...")
                     tri.main(new_src_path, dest_path)
-                    h.main(dest_path+"/*")
+                    #h.main(dest_path+"/*")
                     
 
                 self.processing = True
@@ -125,11 +130,16 @@ class ImageProcessor:
                     rescale.main(os.path.join(dest_path, "panoramas"), test=True, flou=blur_value)
                 else:
                     rescale.main(os.path.join(dest_path, "panoramas"), test=True)
-
+ 
                 self.status_label.config(text="Terminé.")
                 self.progress_bar.stop()
                 self.processing = False
+
+                self.tree.update_base_path(os.path.join(dest_path, "panoramas"))
                 messagebox.showinfo("Information", "Images traitées" if process_type == "full" else "Panoramas créés")
+            
+                
+            
             except Exception as e:
                 self.progress_bar.stop()
                 self.processing = False
@@ -152,11 +162,15 @@ class ImageProcessor:
                 self.status_label.config(text="Traitement des panoramas en cours...")
                 self.progress_bar.start()
 
+                
+
                 indice.main(panorama_path, Ic)
                 self.status_label.config(text="Egalisation en cours...")
                 self.status_label.config(text="Traitement terminé.")
                 self.progress_bar.stop()
                 self.processing = False
+
+                self.tree.update_base_path(panorama_path)
 
                 if Ic == "text":
                     messagebox.showinfo("Information", "Indice de texture calculé.")
@@ -176,28 +190,6 @@ class ImageProcessor:
 
         Thread(target=process).start()
 
-    def show_result_image(self, image_path, Ic):
-        """
-        Affiche l'image résultat dans une nouvelle fenêtre.
-        """
-        img = Image.open(image_path)
-        img = img.resize((800, 600))
-
-        image_window = tk.Toplevel()
-        if Ic == "text":
-            image_window.title("Indice de texture des sols")
-        elif Ic == "sal":
-            image_window.title("Indice de salinité")
-        elif Ic == "org":
-            image_window.title("Indice de matière organique")
-        elif Ic == "savi":
-            image_window.title("Indice de végétation ajusté pour le sol")
-
-        img_tk = ImageTk.PhotoImage(img)
-        label = tk.Label(image_window, image=img_tk)
-        label.pack()
-        label.image = img_tk
-
     def cancel_processing(self):
         """
         Annule le traitement en cours.
@@ -210,7 +202,7 @@ def init_root():
     """
     root = tk.Tk()
     root.title("Logiciel de traitement d'images multispectrales")
-    root.geometry("800x600")
+    root.geometry("1000x700")
 
     menu_bar = tk.Menu(root)
     root.config(menu=menu_bar)
@@ -265,7 +257,11 @@ def init_root():
     )
     flou_checkbox.pack(expand=0, fill=tk.X)
 
-    processor = ImageProcessor(src_pathentry, dest_pathentry, panoramas_pathentry, status_label, progress_bar, flou_var, blur_value)
+    file_tree_frame = ttk.Frame(root)
+    file_tree_frame.pack(side = tk.BOTTOM,expand=1,fill = tk.BOTH,padx=5,pady=5)
+    file_tree_app = FileTreeApp(file_tree_frame)
+
+    processor = ImageProcessor(src_pathentry, dest_pathentry, panoramas_pathentry, status_label, progress_bar, flou_var, blur_value,file_tree_app)
 
     def quit_app():
         """
@@ -296,6 +292,14 @@ def init_root():
     status_frame.pack(side=tk.BOTTOM, expand=1, fill=tk.X, padx=5, pady=5)
     labelframe.pack(side=tk.TOP, expand=1, fill=tk.BOTH, padx=5, pady=5)
 
+    
+
+    def update_file_tree_app(*args):
+        dest_path = panoramas_pathentry.get_path()
+        file_tree_app.update_base_path(dest_path)
+
+    panoramas_pathentry.folder_path.trace_add("write",update_file_tree_app)
+    
     ttk.Sizegrip(root).pack(side=tk.RIGHT, expand=0, fill=tk.Y, padx=5, pady=5)
 
     return root
