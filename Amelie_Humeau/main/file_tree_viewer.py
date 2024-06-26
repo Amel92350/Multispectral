@@ -1,7 +1,6 @@
-import os
-from tkinter import Tk, Frame, Label, filedialog
-from tkinter import ttk
+from tkinter import Tk, Frame, Canvas, filedialog, ttk
 from PIL import Image, ImageTk
+import os
 
 class FileTreeApp:
     def __init__(self, root, base_path=''):
@@ -20,14 +19,15 @@ class FileTreeApp:
         self.image_frame = Frame(root, bd=2, relief="sunken", padx=10, pady=10)
         self.image_frame.pack(side='right', fill='both', expand=True)
 
-        # Arborescence
-        self.tree = ttk.Treeview(self.tree_frame)
-        self.tree.pack(fill='both', expand=True)
-        self.tree.bind("<Double-1>", self.on_tree_item_click)
+        # Canvas pour afficher l'image
+        self.canvas = Canvas(self.image_frame)
+        self.canvas.pack(fill='both', expand=True)
 
-        # Zone pour afficher l'image
-        self.image_label = Label(self.image_frame, text="No image selected", anchor="center")
-        self.image_label.pack(fill='both', expand=True)
+        # Bind mouse wheel events for zooming
+        self.canvas.bind("<MouseWheel>", self.zoom_image)
+        self.canvas.bind("<Button-4>", self.zoom_image)  # Scroll up
+        self.canvas.bind("<Button-5>", self.zoom_image)  # Scroll down
+        self.canvas.bind("<Double-Button-1>", self.reset_zoom)
 
         # Ajouter un bouton pour ouvrir un dossier
         self.open_button = ttk.Button(self.tree_frame, text="Open Folder", command=self.open_folder)
@@ -37,28 +37,17 @@ class FileTreeApp:
         self.original_image = None
         self.current_image = None
         self.zoom_factor = 1.0
-        
-        self.mouse_x = 0
-        self.mouse_y = 0
+        self.image_id = None
 
-        # Bind mouse wheel events for zooming
-        self.image_label.bind("<MouseWheel>", self.zoom_image)
-        self.image_label.bind("<Button-4>", self.zoom_image)
-        self.image_label.bind("<Button-5>", self.zoom_image)
-        self.image_label.bind("<Double-Button-1>",self.reset_zoom)
+        self.style = ttk.Style()
+        self.style.configure("Treeview", font=("Helvetica", 10))
+        self.style.configure("Treeview.Heading", font=("Helvetica", 12, "bold"))
+        self.style.configure("TLabel", font=("Helvetica", 12))
 
-    def zoom_image(self,event):
-        if event.num == 4 or event.delta > 0:  # Scroll up
-            self.zoom_factor /= 1.1
-        elif event.num == 5 or event.delta < 0:  # Scroll down
-            self.zoom_factor *= 1.1
-
-        self.zoom_factor = min(max(self.zoom_factor,0.1),1.0)
-
-        self.mouse_x=event.x
-        self.mouse_y = event.y
-
-        self.show_zoommed_image(self.current_image)
+        # Arborescence
+        self.tree = ttk.Treeview(self.tree_frame)
+        self.tree.pack(fill='both', expand=True)
+        self.tree.bind("<Double-1>", self.on_tree_item_click)
 
     def open_folder(self):
         folder_path = filedialog.askdirectory()
@@ -90,59 +79,69 @@ class FileTreeApp:
 
     def display_image(self, path):
         try:
-            image = Image.open(path)
-            self.original_image = image  # Save original image for zooming
-            self.current_image = image.copy()  # Save a copy for modifications
+            # Load original image
+            original_image = Image.open(path)
+
+            # Resize original image if it exceeds frame dimensions
+            frame_width = self.image_frame.winfo_width()
+            frame_height = self.image_frame.winfo_height()
+
+            if original_image.width > frame_width or original_image.height > frame_height:
+                original_image.thumbnail((frame_width, frame_height))
+
+            self.original_image = original_image  # Save original image for zooming
+            self.current_image = original_image.copy()  # Save a copy for display
             self.zoom_factor = 1.0  # Reset zoom factor
-            self.show_image(image)
+            self.show_image(original_image)
+
         except Exception as e:
-            self.image_label.config(text=str(e))  # Debug: Afficher les erreurs d'ouverture d'image
+            self.canvas.create_text(self.canvas.winfo_width()/2, self.canvas.winfo_height()/2, text=str(e))
 
-    def show_image(self,image):
-
-        image.thumbnail((self.image_frame.winfo_width(), self.image_frame.winfo_height()))
+    def show_image(self, image):
+        # Convert Image to PhotoImage and display on canvas
         photo = ImageTk.PhotoImage(image)
-        self.image_label.config(image=photo, text='')
-        self.image_label.image = photo
+        self.canvas.image = photo  # Keep a reference to prevent garbage collection
+        self.canvas.delete("all")
+        self.image_id = self.canvas.create_image(0, 0, anchor='nw', image=photo)
+        self.canvas.config(scrollregion=self.canvas.bbox(self.image_id))
 
-    def show_zoommed_image(self, image):
-        # Resize image to fit in the frame while keeping aspect ratio
+    def zoom_image(self, event):
+        # Calculate zoom factor based on mouse wheel or button clicks
+        if event.num == 4 or event.delta > 0:  # Scroll up
+            self.zoom_factor *= 1.1
+        elif event.num == 5 or event.delta < 0:  # Scroll down
+            self.zoom_factor /= 1.1
 
-        zoomed_size = (
-            int(image.width * self.zoom_factor),
-            int(image.height * self.zoom_factor)
-        )
+        # Limit zoom factor to a reasonable range
+        self.zoom_factor = min(max(self.zoom_factor, 0.1), 10.0)
 
-        
+        # Get current mouse position relative to the canvas
+        mouse_x = self.canvas.canvasx(event.x)
+        mouse_y = self.canvas.canvasy(event.y)
 
-        #Calculate coordinates to keep the mouse position fixed
-        x0 = int(self.mouse_x - (self.mouse_x/zoomed_size[0])* self.image_frame.winfo_width())
-        y0 = int(self.mouse_y - (self.mouse_y/zoomed_size[1])* self.image_frame.winfo_height())
-        x1 = x0+self.image_frame.winfo_width()
-        y1 = y0+self.image_frame.winfo_height()
+        # Calculate the new width and height based on zoom factor
+        new_width = int(self.original_image.width * self.zoom_factor)
+        new_height = int(self.original_image.height * self.zoom_factor)
 
-        # Crop the image if it exceeds the frame size
-        if x0 < 0:
-            x0 = 0
-        if y0 < 0:
-            y0 = 0
-        if x1 > image.width:
-            x1 = image.width
-        if y1 > image.height:
-            y1 = image.height
+        # Resize the image
+        resized_image = self.original_image.resize((new_width, new_height))
 
-        cropped_image = image.crop((x0,y0,x1,y1))
-
-        resized_image = cropped_image.resize(zoomed_size)
+        # Display the resized image
         self.show_image(resized_image)
 
-    def reset_zoom(self,event):
-        self.zoom_factor = 1.0
-        self.show_image(self.original_image)
-    
+        # Adjust the canvas view to center around the mouse position
+        self.canvas.xview_moveto(mouse_x / new_width)
+        self.canvas.yview_moveto(mouse_y / new_height)
 
-    def update_base_path(self, base_path):
-        self.base_path = base_path
+    def reset_zoom(self, event):
+        # Reset zoom factor to 1.0 (original size)
+        self.zoom_factor = 1.0
+        # Redisplay the original image
+        self.show_image(self.original_image)
+
+
+    def update_base_path(self,base_path):
+        self.base_path=base_path
         self.tree.delete(*self.tree.get_children())
         if os.path.isdir(base_path):
             self.populate_tree(base_path)
