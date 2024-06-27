@@ -51,4 +51,4 @@ def main(src_path,dest_path):
     
     
 if __name__ == "__main__":
-    main("C:/Users/AHUMEAU/Desktop/test/copied_images","C:/Users/AHUMEAU/Desktop/donnees_triees_test")
+    main("C:/Users/AHUMEAU/Desktop/test","C:/Users/AHUMEAU/Desktop/metashape")

@@ -11,6 +11,7 @@ import histogramme as h
 from PIL import Image, ImageTk
 import shutil
 from file_tree_viewer import FileTreeApp
+import time
 
 class FileEntry(ttk.Frame):
     """
@@ -103,6 +104,7 @@ class ImageProcessor:
             """
             Fonction de traitement des images exécutée dans un thread séparé.
             """
+            start_time = time.time()
             try:
                 if process_type == "full":
                     new_src_path = os.path.join(src_path, "copied_images")
@@ -117,7 +119,7 @@ class ImageProcessor:
 
                     self.status_label.config(text="Tri en cours...")
                     tri.main(new_src_path, dest_path)
-                    #h.main(dest_path+"/*")
+                    h.main(dest_path+"/*")
                     
 
                 self.processing = True
@@ -136,8 +138,14 @@ class ImageProcessor:
                 self.processing = False
 
                 self.tree.update_base_path(os.path.join(dest_path, "panoramas"))
-                messagebox.showinfo("Information", "Images traitées" if process_type == "full" else "Panoramas créés")
-            
+                elapsed_time = time.time() - start_time
+                elapsed_minutes,elapsed_seconds = divmod(elapsed_time,60)
+                messagebox.showinfo(
+                    "Information",
+                    f"Images traitées en {int(elapsed_minutes)} minutes et {int(elapsed_seconds)} secondes."
+                    if process_type == "full" else
+                    f"Panoramas créés en {int(elapsed_minutes)} minutes et {int(elapsed_seconds)} secondes."
+                )
                 
             
             except Exception as e:

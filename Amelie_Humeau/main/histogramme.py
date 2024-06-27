@@ -11,7 +11,7 @@ def calculer_histogramme(img):
     h = np.zeros((256))
     for p in img.ravel():
         h[p] += 1
-
+    
     return h
 
 def get_indice_max(tab):
@@ -23,7 +23,7 @@ def get_indice_max(tab):
     i_max =0
 
     for i in range(0,len(tab)-1):
-        if(tab[i]!=0)and tab[i]>=100:
+        if tab[i]>0:
             i_max = i
 
     return i_max
@@ -43,34 +43,24 @@ def etirer_min_max(img):
     :param img: Image en entrée
     :return: indice max
     """
-    new_img = np.zeros_like(img)
+    
     hist = calculer_histogramme(img)
+    
     max_v = get_indice_max(hist)
     min_v = get_indice_min(hist)
-
-
+    
     if max_v == 0:
         return img
 
     if max_v - min_v == 0:
         return np.ones_like(img) *255
 
-    img_test = img.copy()
-    for i in range(img.shape[0]):
-        for j in range(img.shape[1]):
-            pixel = 255*((img_test[i,j]-min_v)/(max_v-min_v))
-            for k in range(len(pixel)):
-                pixel[k] = int(pixel[k])
+    normalized_img = 255 * ((img - min_v)/(max_v-min_v))
+    normalized_img = np.clip(normalized_img, 0, 255).astype(int)
 
-            if pixel.all() == 0:
-                new_img[i,j] = img[i,j-1]
-                new_img[i, j] = np.clip(new_img[i, j], 0, 255)
-            else:
-                new_img[i,j] = pixel
-                new_img[i, j] = np.clip(new_img[i, j], 0, 255)
-    kernel =  np.ones((3,3),np.uint8)
-    new_img = cv2.morphologyEx(new_img,cv2.MORPH_CLOSE,kernel)
-    new_img = cv2.GaussianBlur(new_img,(3,3),0)
+
+    new_img = np.clip(new_img,0,255).astype(np.uint8)
+
     return new_img
 
 
@@ -80,9 +70,10 @@ def main(input_folder):
     image_paths = glob.glob(input_folder + "/*.tif")
     for path in image_paths:
         print(path)
-        image = cv2.imread(path)
-        etiree = etirer_min_max(image)
-        cv2.imwrite(path,etiree)
+        if os.path.isfile(path):
+            image = cv2.imread(path)
+            etiree = etirer_min_max(image)
+            cv2.imwrite(path,etiree)
 
 def test(input_img):
     """
@@ -97,4 +88,4 @@ def test(input_img):
     
 
 if __name__ == "__main__":
-    test("C:/Users/AHUMEAU/Desktop/donnees_triees_test/415nm/20210814_092734415nm.tif")
+    test("C:/Users/AHUMEAU/Desktop/donnees_triees_test/570nm/20210814_093834570nm.tif")
