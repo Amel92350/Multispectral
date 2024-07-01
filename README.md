@@ -51,6 +51,10 @@ Pour exécuter ce logiciel, assurez-vous d'avoir installé les dépendances Pyth
 
    ```bash
    python main.py
+
+  Assurez-vous d'utiliser Python 3.11 ou une version supérieure pour exécuter le logiciel.
+
+
 ## Auteurs
 
 * Amel92350
