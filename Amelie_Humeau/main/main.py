@@ -12,6 +12,7 @@ from PIL import Image, ImageTk
 import shutil
 from file_tree_viewer import FileTreeApp
 import time
+import test_metashape as meta
 
 class FileEntry(ttk.Frame):
     """
@@ -119,25 +120,25 @@ class ImageProcessor:
 
                     self.status_label.config(text="Tri en cours...")
                     tri.main(new_src_path, dest_path)
-                    h.main(dest_path+"/*")
+                    #h.main(dest_path+"/*")
                     
 
                 self.processing = True
                 self.status_label.config(text="Création des panoramas en cours...")
                 self.progress_bar.start()
-                stitch.main(dest_path)
+                meta.main(dest_path)
 
                 self.status_label.config(text="Redimensionnement en cours...")
                 if apply_blur:
-                    rescale.main(os.path.join(dest_path, "panoramas"), test=True, flou=blur_value)
+                    rescale.main(os.path.join(dest_path, "orthos"), test=True, flou=blur_value)
                 else:
-                    rescale.main(os.path.join(dest_path, "panoramas"), test=True)
+                    rescale.main(os.path.join(dest_path, "orthos"), test=True)
  
                 self.status_label.config(text="Terminé.")
                 self.progress_bar.stop()
                 self.processing = False
 
-                self.tree.update_base_path(os.path.join(dest_path, "panoramas"))
+                self.tree.update_base_path(os.path.join(dest_path, "orthos"))
                 elapsed_time = time.time() - start_time
                 elapsed_minutes,elapsed_seconds = divmod(elapsed_time,60)
                 messagebox.showinfo(

@@ -3,6 +3,8 @@ import glob
 import os
 # from main import histogramme as h
 import histogramme as h
+from PIL import Image
+import numpy as np
 
 def calcul(panoramaA,panoramaB,ajustement=0):
     subtracted = cv2.subtract(panoramaA,panoramaB)
@@ -69,13 +71,17 @@ def main(panoramas_path,Ic="text"):
         elif "450nm" in panorama: 
             panorama_b = cv2.imread(panorama)
         elif "570nm" in panorama:
-            panorama_v = cv2.imread(panorama)
+            panorama_v =Image.open(panorama)
+            panorama_v = np.array(panorama_swir)
         elif "675nm" in panorama:
-            panorama_r = cv2.imread(panorama)
+            panorama_r =Image.open(panorama)
+            panorama_r = np.array(panorama_swir)
         elif "730nm" in panorama:
-            panorama_nir = cv2.imread(panorama)
+            panorama_nir =Image.open(panorama)
+            panorama_nir = np.array(panorama_swir)
         elif "850nm" in panorama :
-            panorama_swir = cv2.imread(panorama)
+            panorama_swir =Image.open(panorama)
+            panorama_swir = np.array(panorama_swir)
 
 
     if Ic == "text":

@@ -59,9 +59,7 @@ def etirer_min_max(img):
     normalized_img = np.clip(normalized_img, 0, 255).astype(int)
 
 
-    new_img = np.clip(new_img,0,255).astype(np.uint8)
-
-    return new_img
+    return normalized_img
 
 
 
@@ -81,11 +79,12 @@ def test(input_img):
     """
     img = cv2.imread(input_img)
     new_img = etirer_min_max(img)
-    cv2.imshow("image" , img)
-    cv2.waitKey(0)
-    cv2.imshow("image etiree",new_img)
-    cv2.waitKey(0)
-    
+    fig,(ax1,ax2)= plt.subplots(1,2,figsize=(10,5))
+    ax1.imshow(img)
+    ax1.set_title("Image")
+    ax2.imshow(new_img)
+    ax2.set_title("Nouvelle image")
+    plt.show()
 
 if __name__ == "__main__":
-    test("C:/Users/AHUMEAU/Desktop/donnees_triees_test/570nm/20210814_093834570nm.tif")
+    test("C:/Users/AHUMEAU/Desktop/donnees_triees_test/570nm/20210814_093554570nm.tif")
