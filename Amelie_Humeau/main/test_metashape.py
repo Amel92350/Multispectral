@@ -34,6 +34,10 @@ def traitement(doc:Metashape.Document,folders_path:str):
         chunk.matchPhotos(downscale=1,generic_preselection=True,reference_preselection=True)
         chunk.alignCameras()
 
+        # Calibrer les couleurs
+        chunk.calibrateColors(white_balance=True,source_data=Metashape.DataSource.TiePointsData)
+
+
         # Construire un nuage de points dense
         chunk.buildDepthMaps(downscale=4,filter_mode = Metashape.AggressiveFiltering)
 
@@ -41,7 +45,7 @@ def traitement(doc:Metashape.Document,folders_path:str):
         # Construire un maillage
         chunk.buildModel(source_data=Metashape.DepthMapsData,surface_type = Metashape.Arbitrary,interpolation=Metashape.EnabledInterpolation)
 
-
+        
         # Créer l'orthomosaïque 
         chunk.buildOrthomosaic(surface_data=Metashape.DataSource.ModelData)
 
