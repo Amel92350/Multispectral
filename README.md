@@ -17,6 +17,7 @@ Ce repository contient le code source d'un logiciel de traitement d'images multi
 * NumPy
 * Pillow
 * Matplotlib
+* licence Metashape 
 
 ## Installation
 
@@ -27,26 +28,17 @@ Ce repository contient le code source d'un logiciel de traitement d'images multi
 
 Pour exécuter ce logiciel, assurez-vous d'avoir installé les dépendances Python spécifiées. De plus, le logiciel utilise l'API Metashape pour certaines fonctionnalités. Voici comment configurer l'environnement :
 
-1. **Installation de Metashape :** Téléchargez et installez Metashape depuis [le site officiel de Metashape](https://www.agisoft.com/downloads/installer/) selon les instructions fournies.
+1. **Téléchargez Agisoft Metashape Pro :**  Téléchargez Agisoft Metashape Professional depuis [le site officiel de Metashape](https://www.agisoft.com/downloads/installer/).
 
-2. **Configuration de l'environnement :** Pour utiliser Metashape avec ce logiciel, assurez-vous que l'exécutable Python de Metashape est ajouté à votre chemin d'accès système. Vous pouvez le faire en créant un fichier batch (.bat) comme suit :
+2. **Télécharger du module Python Metashape :** Téléchargez le module python de Metashape depuis le même site.
 
-   - Créez un nouveau fichier texte et renommez-le `setup_env.bat`.
-
-   - Ouvrez `setup_env.bat` avec un éditeur de texte et ajoutez les lignes suivantes :
+3. **Installez le module :** Installez le module python à l'aide de `pip` : 
 
      ```batch
-     @echo off
-     set METASHAPE_PATH="C:\Chemin\vers\le\dossier\Metashape"
-     set PATH=%METASHAPE_PATH%;%PATH%
+     pip install Metashape-2.1.2-cp37.cp38.cp39.cp310.cp311-none-win_amd64.whl
      ```
-
-     Remplacez `"C:\Chemin\vers\le\dossier\Metashape"` par le chemin réel où Metashape est installé sur votre système.
-
-   - Enregistrez le fichier `setup_env.bat`.
-
-3. **Exécution du batch :** Avant d'exécuter le logiciel, ouvrez une nouvelle fenêtre de terminal et exécutez `setup_env.bat`. Cela ajoutera Metashape à votre chemin d'accès, permettant au logiciel de trouver l'API Metashape correctement.
-
+     par exemple en remplaçant le nom du module avec celui que vous avez installé
+   
 4. **Lancement du logiciel :** Une fois l'environnement configuré, exécutez le logiciel à l'aide de la commande :
 
    ```bash
