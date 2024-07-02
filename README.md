@@ -6,9 +6,11 @@ Ce repository contient le code source d'un logiciel de traitement d'images multi
 
 - **Traitement d'images multispectrales :** Effectuez des traitements d'images tels que la correction de la distorsion, l'alignement, et le recadrage.
 
-- **Création de panoramas:** Créez des panoramas à partir des images traitées.
+- **Création d'orthomosaïque:** Créez des orthomosaïques à partir des images traitées.
 
 - **Application d'indices:** Appliquez différents indices sur les panoramas.
+
+- **Visualisation d'images:** Visualisez les images du dossier selectionné ou les orthomosaïques créées.
   
 ## Dépendances
 
@@ -17,6 +19,7 @@ Ce repository contient le code source d'un logiciel de traitement d'images multi
 * NumPy
 * Pillow
 * Matplotlib
+* licence Metashape 
 
 ## Installation
 
@@ -25,7 +28,26 @@ Ce repository contient le code source d'un logiciel de traitement d'images multi
 
 ## Utilisation
 
-Exécutez le logiciel à l'aide de la commande `python main.py
+Pour exécuter ce logiciel, assurez-vous d'avoir installé les dépendances Python spécifiées. De plus, le logiciel utilise l'API Metashape pour certaines fonctionnalités. Voici comment configurer l'environnement :
+
+1. **Téléchargez Agisoft Metashape Pro :**  Téléchargez Agisoft Metashape Professional depuis [le site officiel de Metashape](https://www.agisoft.com/downloads/installer/).
+
+2. **Télécharger du module Python Metashape :** Téléchargez le module python de Metashape depuis le même site.
+
+3. **Installez le module :** Installez le module python à l'aide de `pip` : 
+
+     ```batch
+     pip install Metashape-2.1.2-cp37.cp38.cp39.cp310.cp311-none-win_amd64.whl
+     ```
+     par exemple en remplaçant le nom du module avec celui que vous avez installé
+   
+4. **Lancement du logiciel :** Une fois l'environnement configuré, exécutez le logiciel à l'aide de la commande :
+
+   ```bash
+   python main.py
+
+  Assurez-vous d'utiliser Python 3.11 ou une version supérieure pour exécuter le logiciel.
+
 
 ## Auteurs
 
