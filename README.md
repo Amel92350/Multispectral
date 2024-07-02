@@ -6,9 +6,11 @@ Ce repository contient le code source d'un logiciel de traitement d'images multi
 
 - **Traitement d'images multispectrales :** Effectuez des traitements d'images tels que la correction de la distorsion, l'alignement, et le recadrage.
 
-- **Création de panoramas:** Créez des panoramas à partir des images traitées.
+- **Création d'orthomosaïque:** Créez des orthomosaïques à partir des images traitées.
 
 - **Application d'indices:** Appliquez différents indices sur les panoramas.
+
+- **Visualisation d'images:** Visualisez les images du dossier selectionné ou les orthomosaïques créées.
   
 ## Dépendances
 
