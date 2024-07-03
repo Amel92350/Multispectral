@@ -1,6 +1,7 @@
 import os
 import tkinter as tk
 from tkinter import ttk, messagebox
+import re
 
 class AddIndexWindow:
     def __init__(self, parent, on_select):
@@ -80,19 +81,31 @@ class AddIndexWindow:
                 checkbox.pack(anchor=tk.W)
                 self.checkboxes.append((index_name,var))
 
+    def check_calcul(self,calcul:str)->bool:
+        constantes = ["415nm", "450nm", "570nm", "675nm", "730nm", "850nm"]
+        constantes_regex = '|'.join(re.escape(c) for c in constantes)
+
+        const_or_expr = rf'(?:{constantes_regex}|\([^()]*\))'
+        expression_regex = re.compile(rf'^\s*{const_or_expr}(?:\s*[-+*/]\s*{const_or_expr})*\s*$')
+
+        return bool(expression_regex.match(calcul))
+
     def on_add(self):
         
         calcul = self.calcul_entry.get()
-        name = self.name_entry.get()
-        filename = name.replace(' ','_')
-        fichier = open(os.path.join(self.calc_dir,f"{filename}.txt"),"a")
-        fichier.write(calcul)
-        fichier.close()
-        calcul = self.calcul_entry.get()
-        var = tk.BooleanVar(value=True)
-        checkbox = ttk.Checkbutton(self.top,text=name,variable=var)
-        checkbox.pack(anchor=tk.W)
-        self.checkboxes.append((name,var))
+        if self.check_calcul(calcul):
+            name = self.name_entry.get()
+            filename = name.replace(' ','_')
+            fichier = open(os.path.join(self.calc_dir,f"{filename}.txt"),"a")
+            fichier.write(calcul)
+            fichier.close()
+            calcul = self.calcul_entry.get()
+            var = tk.BooleanVar(value=True)
+            checkbox = ttk.Checkbutton(self.top,text=name,variable=var)
+            checkbox.pack(anchor=tk.W)
+            self.checkboxes.append((name,var))
+        else:
+            messagebox.showwarning("Avertissement", "l'expression n'est pas valide, exmple d'expression correcte : '450nm+415nm'")
         
 
     def on_ok(self):
@@ -102,3 +115,17 @@ class AddIndexWindow:
             self.top.destroy()
         else:
             messagebox.showwarning("Avertissement", "Veuillez sélectionner un indice à ajouter.")
+
+if __name__=="__main__":
+    expressions = [
+        "(675nm-570nm)*(675nm+570nm)",
+        "540*65",
+        "570nm + 415nm * 675nm - 570nm",
+        "675nm--570nm"
+    ]
+
+    root = tk.Tk()
+    test = AddIndexWindow(root,None)
+
+    for expr in expressions:
+        print(f'Expression : {expr}, Valide : {test.check_calcul(expr)}')

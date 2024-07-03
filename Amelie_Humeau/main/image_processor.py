@@ -4,7 +4,7 @@ import time
 import tkinter as tk
 from tkinter import ttk, messagebox
 from threading import Thread
-import Correction as correction
+import correction 
 import rescale
 import tri
 import test_metashape as meta
