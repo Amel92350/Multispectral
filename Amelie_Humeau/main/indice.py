@@ -88,7 +88,7 @@ def main(orthomosaic_path,Ic="text"):
 
     if Ic == "text":
         divided = rv(orthomosaic_r,orthomosaic_v)
-        divided = h.etirer_min_max(divided)
+        #divided = h.etirer_min_max(divided)
         cv2.imwrite(os.path.join(orthomosaic_path, "rv.tif"), divided)
 
     elif Ic == "sal":
@@ -108,4 +108,4 @@ def main(orthomosaic_path,Ic="text"):
 
 
 if __name__ == "__main__":
-    main("C:/Users/AHUMEAU/Desktop/Pontcharaud/donnees_triees_groupe5/panoramas",Ic = "savi")
+    main("C:/Users/AHUMEAU/Desktop/donnees_triees_test/panoramas",Ic = "text")

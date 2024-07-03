@@ -30,7 +30,7 @@ class FileTreeApp:
         self.canvas.bind("<Double-Button-1>", self.reset_zoom)
 
         # Ajouter un bouton pour ouvrir un dossier
-        self.open_button = ttk.Button(self.tree_frame, text="Open Folder", command=self.open_folder)
+        self.open_button = ttk.Button(self.tree_frame, text="Ouvrir", command=self.open_folder)
         self.open_button.pack(side='bottom', pady=10)
 
         self.base_path = ''  # Chemin pour le dossier ouvert

@@ -1,22 +1,38 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
-from file_entry import FileEntry
+from file_entry import FileEntry 
 from image_processor import ImageProcessor
 from file_tree_viewer import FileTreeApp
 from add_index_window import AddIndexWindow
+from ttkthemes import ThemedTk
+from image_raster_calculator import ImageRasterCalculator
+import glob, cv2
 
 class MainApplication:
     def __init__(self, root):
         self.root = root
         self.root.title("Logiciel de traitement d'images multispectrales")
         self.root.geometry("1000x700")
+    
+        self.root.set_theme("clearlooks")
+        self.bg_color = self.root.tk.eval("ttk::style lookup TFrame -background")
 
+        self.init_styles()
         self.init_menu()
         self.init_widgets()
         self.processor = ImageProcessor(
             self.src_pathentry, self.dest_pathentry, self.orthomosaic_pathentry,
             self.status_label, self.progress_bar, self.flou_var, self.blur_value, self.file_tree_app
         )
+
+    def init_styles(self):
+        style = ttk.Style()
+        style.configure('TButton', font=('Helvetica', 10))
+        style.configure('TLabel', font=('Helvetica', 12))
+        style.configure('TEntry', font=('Helvetica', 10))
+        style.configure('TCheckbutton', font=('Helvetica', 10))
+        style.configure('TLabelFrame', font=('Helvetica', 12, 'bold'), background=self.bg_color)
+        style.configure('TFrame', background=self.bg_color)
 
     def init_menu(self):
         menu_bar = tk.Menu(self.root)
@@ -32,26 +48,23 @@ class MainApplication:
         action_menu.add_command(label="Créer des orthomosaïques", command=lambda: self.processor.start_processing("panoramas"))
 
         indice_menu = tk.Menu(menu_bar, tearoff=0)
-        menu_bar.add_cascade(label="Indices", menu=indice_menu)
-        indice_menu.add_command(label="Ajouter un indice", command=self.open_add_index_window)
-        indice_menu.add_command(label="Indice de texture des sols", command=lambda: self.processor.process_index("text"))
-        indice_menu.add_command(label="Indice de salinité", command=lambda: self.processor.process_index("sal"))
-        indice_menu.add_command(label="Indice de matière organique", command=lambda: self.processor.process_index("org"))
-        indice_menu.add_command(label="Indice de végétation ajusté pour le sol", command=lambda: self.processor.process_index("savi"))
+        menu_bar.add_cascade(label="Raster", menu=indice_menu)
+        indice_menu.add_command(label="Ajouter un Raster", command=lambda: self.open_add_index_window("add"))
+        indice_menu.add_command(label="Applique Raster", command=lambda: self.open_add_index_window("applique"))
 
     def init_widgets(self):
-        labelframe = ttk.LabelFrame(self.root, text="Bienvenue", padding="5px")
-        labelframe.pack(side=tk.TOP, expand=1, fill=tk.BOTH, padx=5, pady=5)
+        labelframe = ttk.LabelFrame(self.root, text="Bienvenue", padding="10px")
+        labelframe.pack(side=tk.TOP, expand=1, fill=tk.BOTH, padx=10, pady=10)
 
         self.src_pathentry = FileEntry(labelframe, label="Dossier source : ")
         self.dest_pathentry = FileEntry(labelframe, label="Dossier destination : ")
         self.orthomosaic_pathentry = FileEntry(labelframe, label="Dossier des orthomosaïques")
 
-        self.src_pathentry.pack(expand=0, fill=tk.X)
-        self.dest_pathentry.pack(expand=0, fill=tk.X)
-        self.orthomosaic_pathentry.pack(expand=0, fill=tk.X)
+        self.src_pathentry.pack(expand=0, fill=tk.X, pady=5)
+        self.dest_pathentry.pack(expand=0, fill=tk.X, pady=5)
+        self.orthomosaic_pathentry.pack(expand=0, fill=tk.X, pady=5)
 
-        status_frame = ttk.LabelFrame(labelframe, text="Statut", padding="5px")
+        status_frame = ttk.LabelFrame(labelframe, text="Statut", padding="10px")
         status_frame.pack(side=tk.BOTTOM, expand=1, fill=tk.X, padx=5, pady=5)
 
         self.status_label = ttk.Label(status_frame, text="Prêt")
@@ -73,11 +86,11 @@ class MainApplication:
                 self.blur_entry.pack_forget()
 
         self.blur_entry = ttk.Entry(flou_frame, textvariable=self.blur_value)
-        flou_checkbox = ttk.Checkbutton(flou_frame, text="Appliquer le flou", variable=self.flou_var, command=toggle_blur_entry)
+        flou_checkbox = ttk.Checkbutton(flou_frame, text="Appliquer une médiane", variable=self.flou_var, command=toggle_blur_entry)
         flou_checkbox.pack(expand=0, fill=tk.X)
 
         file_tree_frame = ttk.Frame(self.root)
-        file_tree_frame.pack(side=tk.BOTTOM, expand=1, fill=tk.BOTH, padx=5, pady=5)
+        file_tree_frame.pack(side=tk.BOTTOM, expand=1, fill=tk.BOTH, padx=10, pady=10)
         self.file_tree_app = FileTreeApp(file_tree_frame)
 
         def update_file_tree_app(*args):
@@ -93,16 +106,22 @@ class MainApplication:
         else:
             messagebox.showinfo("Information", "Attendez que le traitement soit terminé avant de quitter.")
 
-    def open_add_index_window(self):
-
+    def open_add_index_window(self, mode):
         def on_select(indices):
-            print(f"Indices selectionnés : {indices}")
-
-        AddIndexWindow(self.root, on_select)
-
+            orthos_path = self.orthomosaic_pathentry.get_path()
+            orthos = glob.glob(orthos_path+"/*.tif")
+            calculator = ImageRasterCalculator(orthos_path)
+            for index in indices:
+                with open(index,"r") as index_f:
+                    expression = index_f.readlines()[0]
+                if expression:
+                    print(expression)
+                    result = calculator.evalutate_expression(expression)
+                    cv2.imwrite(orthos_path+"/test.tif",result)
+        AddIndexWindow(self.root, on_select, mode)
 
 def main():
-    root = tk.Tk()
+    root = ThemedTk(theme="clearlooks")
     app = MainApplication(root)
     root.mainloop()
 
