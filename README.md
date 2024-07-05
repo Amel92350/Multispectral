@@ -39,7 +39,7 @@ Pour exécuter ce logiciel, assurez-vous d'avoir installé les dépendances Pyth
      ```batch
      pip install Metashape-2.1.2-cp37.cp38.cp39.cp310.cp311-none-win_amd64.whl
      ```
-     par exemple en remplaçant le nom du module avec celui que vous avez installé
+     par exemple en remplaçant le nom du module avec celui que vous avez téléchargé
    
 4. **Lancement du logiciel :** Une fois l'environnement configuré, exécutez le logiciel à l'aide de la commande :
 
