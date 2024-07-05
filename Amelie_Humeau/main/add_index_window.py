@@ -112,8 +112,13 @@ class AddIndexWindow:
         if self.check_calcul(calcul):
             name = self.name_entry.get()
             filename = name.replace(' ', '_')
-            with open(os.path.join(self.calc_dir, f"{filename}.txt"), "a") as fichier:
-                fichier.write(calcul)
+            if os.path.exists(os.path.join(self.calc_dir, f"{filename}.txt")):
+
+                with open(os.path.join(self.calc_dir, f"{filename}.txt"), "w") as fichier:
+                    fichier.write(calcul)
+            else:
+                with open(os.path.join(self.calc_dir, f"{filename}.txt"), "a") as fichier:
+                    fichier.write(calcul)
             messagebox.showinfo("Succès", "Indice ajouté avec succès.")
         else:
             messagebox.showwarning("Avertissement", "L'expression n'est pas valide, exemple d'expression correcte : '450nm+415nm'")

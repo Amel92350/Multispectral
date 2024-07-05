@@ -44,7 +44,7 @@ def etirer_min_max(img):
     :return: indice max
     """
     
-    hist = calculer_histogramme(img)
+    hist = cv2.calcHist([img],[0],None,[256],[0,256])
     
     max_v = get_indice_max(hist)
     min_v = get_indice_min(hist)
@@ -56,7 +56,6 @@ def etirer_min_max(img):
         return np.ones_like(img) *255
 
     normalized_img = 255 * ((img - min_v)/(max_v-min_v))
-    normalized_img = np.clip(normalized_img, 0, 255).astype(int)
 
 
     return normalized_img

@@ -13,7 +13,7 @@ def get_folder_band(path:str)->str:
     elif "675nm" in path:
         bande = "675nm"
     elif "730nm" in path:
-        bande = "730mn"
+        bande = "730nm"
     else:
         bande = "850nm"
     return bande

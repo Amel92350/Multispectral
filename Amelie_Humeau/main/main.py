@@ -6,7 +6,7 @@ from file_tree_viewer import FileTreeApp
 from add_index_window import AddIndexWindow
 from ttkthemes import ThemedTk
 from image_raster_calculator import ImageRasterCalculator
-import glob, cv2
+import glob, cv2, os
 
 class MainApplication:
     def __init__(self, root):
@@ -51,6 +51,10 @@ class MainApplication:
         menu_bar.add_cascade(label="Raster", menu=indice_menu)
         indice_menu.add_command(label="Ajouter un Raster", command=lambda: self.open_add_index_window("add"))
         indice_menu.add_command(label="Applique Raster", command=lambda: self.open_add_index_window("applique"))
+
+        help_menu = tk.Menu(menu_bar, tearoff=0)
+        menu_bar.add_cascade(label="Aide", menu=help_menu)
+        help_menu.add_command(label="Aide", command=self.open_help_window)
 
     def init_widgets(self):
         labelframe = ttk.LabelFrame(self.root, text="Bienvenue", padding="10px")
@@ -112,13 +116,43 @@ class MainApplication:
             orthos = glob.glob(orthos_path+"/*.tif")
             calculator = ImageRasterCalculator(orthos_path)
             for index in indices:
+                filename = os.path.basename(index).replace("txt",'tif')
                 with open(index,"r") as index_f:
                     expression = index_f.readlines()[0]
                 if expression:
                     print(expression)
                     result = calculator.evalutate_expression(expression)
-                    cv2.imwrite(orthos_path+"/test.tif",result)
+                    cv2.imwrite(os.path.join(orthos_path,filename),result)
         AddIndexWindow(self.root, on_select, mode)
+
+    def open_help_window(self):
+        help_window = tk.Toplevel(self.root)
+        help_window.title("Aide")
+        help_window.geometry("600x400")
+
+        help_text = """
+        Bienvenue dans l'aide de l'application de traitement d'images multispectrales !
+
+        Cette application permet de :
+        - Sélectionner un dossier source contenant les images à traiter.
+        - Sélectionner un dossier de destination pour les résultats.
+        - Créer des orthomosaïques à partir des images sélectionnées.
+        - Ajouter et appliquer des rasters pour les traitements d'images.
+        - Visualiser les fichiers traités dans une arborescence.
+
+        Menu :
+        - Fichier : Quitter l'application.
+        - Actions : Lancer le traitement complet ou créer des orthomosaïques.
+        - Raster : Ajouter ou appliquer des rasters.
+        - Aide : Afficher cette fenêtre d'aide.
+
+        Pour plus d'informations, veuillez consulter la documentation complète ou contacter le support technique.
+
+        Bonne utilisation !
+        """
+
+        help_label = tk.Label(help_window, text=help_text, justify=tk.LEFT, padx=10, pady=10)
+        help_label.pack(expand=True, fill=tk.BOTH)
 
 def main():
     root = ThemedTk(theme="clearlooks")

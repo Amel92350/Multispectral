@@ -45,6 +45,7 @@ class ImageProcessor:
             return
 
         src_path = self.src_pathentry.get_path()
+        print(src_path)
         dest_path = self.dest_pathentry.get_path()
         
         if not os.path.exists(dest_path):
@@ -64,6 +65,7 @@ class ImageProcessor:
             try:
                 if process_type == "full":
                     new_src_path = os.path.join(src_path, "copied_images")
+                    print(new_src_path)
                     # Copie les images sources dans un nouveau dossier pour le traitement
                     if os.path.exists(new_src_path):
                         shutil.rmtree(new_src_path)

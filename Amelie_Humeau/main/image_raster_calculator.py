@@ -2,6 +2,7 @@ import os
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
+import histogramme as h
 
 class ImageRasterCalculator:
     def __init__(self, images_folder):
@@ -85,11 +86,9 @@ class ImageRasterCalculator:
                     print(f"Before operation {op}: left={left}, right={right}")
                     
                     if op == '+':
-                        left = np.uint8([[2]])
-                        right = np.uint8([[1]])
 
-                        # Conversion temporaire en np.int32 pour éviter le "capping"
-                        result = cv2.add(np.int32(left), np.int32(right))
+                        # Conversion temporaire en np.float32 pour éviter le "capping"
+                        result = cv2.add(np.float32(left), np.float32(right))
 
                         # Reconversion en np.uint8 si nécessaire
                         result = np.uint8(result)
@@ -97,18 +96,20 @@ class ImageRasterCalculator:
                         print("Left:", left)
                         print("Right:", right)
                         print("Result:", result)
-
+                        self.debug(left, right, result)
+                        print("add")
                     elif op == '-':
-                        result = cv2.subtract(left, right)
+                        result = cv2.subtract(np.float32(left), np.float32(right))
                         print(left,right,result)
+                        self.debug(left, right, result)
                         print("subtract")
                     elif op == '*':
-                        result = cv2.multiply(left, right)
+                        result = cv2.multiply(np.float32(left), np.float32(right))
                         self.debug(left, right, result)
                         print("multiply")
                     elif op == '/':
                         right[right == 0] = 1  # Avoid division by zero
-                        result = cv2.divide(left, right)
+                        result = cv2.divide(np.float32(left), np.float32(right))
                         self.debug(left, right, result)
                         print("divide")
 
@@ -123,7 +124,7 @@ class ImageRasterCalculator:
             for const in constantes:
                 if const in expr:
                     if const in self.images:
-                        return self.images[const]
+                        return self.normalize_image(self.images[const])
                     else:
                         raise ValueError(f"Image {const} introuvable.")
 
@@ -152,6 +153,7 @@ class ImageRasterCalculator:
         if not success:
             raise IOError(f"Erreur lors de l'enregistrement de l'image à {output_path}")
 
+
 # Exemple d'utilisation
 if __name__ == "__main__":
     left = np.uint8([[2]])
@@ -163,6 +165,6 @@ if __name__ == "__main__":
         '450nm': np.uint8([[1]]) 
     }
 
-    expression =  '415nm - 450nm'
+    expression =  '415nm * 450nm'
 
     result = calculator.evalutate_expression(expression)
