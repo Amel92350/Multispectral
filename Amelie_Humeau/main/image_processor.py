@@ -9,7 +9,7 @@ import correction
 import rescale
 import tri
 import test_metashape as meta
-import indice
+
 
 class ImageProcessor:
     """
@@ -63,7 +63,7 @@ class ImageProcessor:
             self.processing = True
             self.cancelled = False
             try:
-                if process_type == "full":
+                if process_type == "full" or process_type == "one":
                     new_src_path = os.path.join(src_path, "copied_images")
                     print(new_src_path)
                     # Copie les images sources dans un nouveau dossier pour le traitement
@@ -74,13 +74,29 @@ class ImageProcessor:
                     self.status_label.config(text="Correction en cours...")
                     self.progress_bar.start()
                     logging.info("Démarrage de la correction.")
-                    correction.main(os.path.join(new_src_path, "*"))
+                    
 
+                    if process_type == "one":
+                        correction.main(new_src_path)
+                        self.status_label.config(text="Tri en cours...")
+                        logging.info("Démarrage du tri.")
+                        tri.one(new_src_path, dest_path)
+                        self.status_label.config(text="Alignement en cours...")
+                        logging.info("Démarrage de l'alignement.")
+                        
+                        rescale.main(os.path.join(dest_path, "orthos"), test=True, flou=blur_value)
+                        self.status_label.config(text="Terminé.")
+                        self.progress_bar.stop()
+                        logging.info("Traitement terminé.")
+                        self.tree.update_base_path(os.path.join(dest_path, "orthos"))
+                        return
+                        
+                    correction.main(new_src_path+"/*")
                     self.status_label.config(text="Tri en cours...")
                     logging.info("Démarrage du tri.")
                     tri.main(new_src_path, dest_path)
 
-                if process_type != "full":
+                if process_type == "orthos":
                     self.progress_bar.start()
                     
                 self.status_label.config(text="Création des orthomosaïques en cours...")
@@ -113,49 +129,6 @@ class ImageProcessor:
                 self.processing = False
 
             self.tree.update_base_path(os.path.join(dest_path, "orthos"))
-
-        Thread(target=process).start()
-
-    def process_index(self, Ic):
-        """
-        Démarre le traitement d'indice spécifié.
-        """
-        if self.processing:
-            messagebox.showwarning("Avertissement", "Un traitement est déjà en cours.")
-            return
-
-        orthomosaic_path = self.orthomosaic_pathentry.get_path()
-
-        def process():
-            """
-            Fonction de traitement des indices exécutée dans un thread séparé.
-            """
-            logging.info("Démarrage du processus de calcul des indices.")
-            self.processing = True
-            self.cancelled = False
-            try:
-                self.status_label.config(text="Calculs en cours...")
-                self.progress_bar.start()
-
-                indice.main(orthomosaic_path, Ic)
-                self.status_label.config(text="Traitement terminé.")
-                logging.info("Calcul des indices terminé.")
-                message = {
-                    "text": "Indice de texture calculé.",
-                    "sal": "Indice de salinité calculé.",
-                    "org": "Indice de matière organique calculé.",
-                    "savi": "Indice de végétation calculé."
-                }.get(Ic, "Traitement d'indice terminé.")
-
-                messagebox.showinfo("Information", message)
-            except Exception as e:
-                logging.error("Erreur lors du calcul des indices : %s", e)
-                messagebox.showerror("Erreur", str(e))
-            finally:
-                self.progress_bar.stop()
-                self.processing = False
-
-            self.tree.update_base_path(orthomosaic_path)
 
         Thread(target=process).start()
 

@@ -2,14 +2,18 @@ import os
 import tkinter as tk
 from tkinter import ttk, messagebox
 import re
+from tkscrolledframe import ScrolledFrame  # Import ScrolledFrame
 
-class AddIndexWindow:
+class AddCalculWindow:
     def __init__(self, parent, on_select, mode):
         self.parent = parent
         self.on_select = on_select
         self.top = tk.Toplevel(parent)
-        self.top.title("Ajouter un Indice")
-        self.top.geometry("400x300")
+        self.top.grab_set()
+        self.top.focus_set()
+        self.top.title("Calculs")
+        self.width = 500
+        self.top.geometry("600x500")
         self.calc_dir = self.get_calc_dir()
         self.mode = mode
 
@@ -31,8 +35,18 @@ class AddIndexWindow:
 
     def init_widgets(self, mode):
         if mode == "applique":
-            label = ttk.Label(self.top, text="Sélectionnez un indice à ajouter")
+            label = ttk.Label(self.top, text="Sélectionnez un ou plusieurs calculs à appliquer")
             label.pack(pady=10)
+
+            # Use ScrolledFrame for checkboxes
+            sf = ScrolledFrame(self.top)
+            sf.pack(expand=True, fill='both')
+
+            # Create a fixed frame within ScrolledFrame for actual content
+            inner_frame = sf.display_widget(ttk.Frame)
+
+            self.checkboxes_frame = ttk.Frame(inner_frame)
+            self.checkboxes_frame.pack(expand=True, fill=tk.X)
 
             self.checkboxes = []
             self.selected_indices = []
@@ -40,7 +54,7 @@ class AddIndexWindow:
             try:
                 self.load_indices()
             except Exception as e:
-                messagebox.showerror("Erreur", f"Erreur lors du chargement des indices : {str(e)}")
+                messagebox.showerror("Erreur", f"Erreur lors du chargement des calculs : {str(e)}")
 
             button_frame = ttk.Frame(self.top)
             button_frame.pack(side=tk.BOTTOM, pady=10)
@@ -50,6 +64,7 @@ class AddIndexWindow:
 
             cancel_button = ttk.Button(button_frame, text="Annuler", command=self.top.destroy)
             cancel_button.pack(side=tk.LEFT, padx=5)
+
 
         elif mode == "add":
             add_frame = ttk.Frame(self.top)
@@ -75,8 +90,6 @@ class AddIndexWindow:
             add_button = ttk.Button(add_frame, text="Ajouter", command=self.on_add)
             add_button.pack(side=tk.LEFT, padx=5)
 
-        
-
     def load_indices(self):
         if not os.path.exists(self.calc_dir):
             raise FileNotFoundError(f"Le dossier '{self.calc_dir}' n'existe pas.")
@@ -87,25 +100,16 @@ class AddIndexWindow:
 
                 var = tk.BooleanVar(value=True)
 
-                frame = ttk.Frame(self.top)
-                frame.pack(anchor=tk.W, fill=tk.X, padx=5,pady=5)
+                frame = ttk.Frame(self.checkboxes_frame)  # Use checkboxes_frame for checkboxes
+                frame.pack(anchor=tk.W, expand=True,fill=tk.X,padx=5,pady=5)
 
                 checkbox = ttk.Checkbutton(frame, text=index_name, variable=var)
-                checkbox.pack(side=tk.LEFT, anchor=tk.W, expand=True)
+                checkbox.pack(anchor=tk.W,side=tk.LEFT, fill=tk.X, expand=True)  # Ensure Checkbutton fills horizontally
 
                 delete_button = ttk.Button(frame, text="❌", command=lambda name=index_name: self.on_delete(name))
-                delete_button.pack(side=tk.RIGHT, anchor=tk.E)
+                delete_button.pack(side=tk.RIGHT, padx=5)  # Adjust padding for the delete button
 
-                self.checkboxes.append((index_name, var, frame))
-
-    def check_calcul(self, calcul: str) -> bool:
-        constantes = ["415nm", "450nm", "570nm", "675nm", "730nm", "850nm"]
-        constantes_regex = '|'.join(re.escape(c) for c in constantes)
-
-        const_or_expr = rf'(?:{constantes_regex}|\([^()]*\))'
-        expression_regex = re.compile(rf'^\s*{const_or_expr}(?:\s*[-+*/]\s*{const_or_expr})*\s*$')
-
-        return bool(expression_regex.match(calcul))
+                self.checkboxes.append((index_name, var,frame))
 
     def on_add(self):
         calcul = self.calcul_entry.get()
@@ -119,7 +123,9 @@ class AddIndexWindow:
             else:
                 with open(os.path.join(self.calc_dir, f"{filename}.txt"), "a") as fichier:
                     fichier.write(calcul)
-            messagebox.showinfo("Succès", "Indice ajouté avec succès.")
+
+            self.top.destroy()
+            messagebox.showinfo("Succès", "Calcul ajouté avec succès.")
         else:
             messagebox.showwarning("Avertissement", "L'expression n'est pas valide, exemple d'expression correcte : '450nm+415nm'")
 
@@ -133,7 +139,7 @@ class AddIndexWindow:
             self.on_select(self.selected_indices)
             self.top.destroy()
         else:
-            messagebox.showwarning("Avertissement", "Veuillez sélectionner un indice à ajouter.")
+            messagebox.showwarning("Avertissement", "Veuillez sélectionner un calcul à appliquer.")
             
     def on_delete(self, name):
         filename = name.replace(' ', '_') + ".txt"
@@ -149,17 +155,6 @@ class AddIndexWindow:
             messagebox.showerror("Erreur", f"Le fichier '{filename}' n'existe pas.")
 
 if __name__ == "__main__":
-    expressions = [
-        "(675nm-570nm)*(675nm+570nm)",
-        "540*65",
-        "570nm + 415nm * 675nm - 570nm",
-        "675nm--570nm"
-    ]
-
     root = tk.Tk()
-    test = AddIndexWindow(root, None, "add")
-
-    for expr in expressions:
-        print(f'Expression : {expr}, Valide : {test.check_calcul(expr)}')
-
+    test = AddCalculWindow(root, None, "applique")
     root.mainloop()

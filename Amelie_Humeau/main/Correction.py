@@ -42,10 +42,8 @@ def get_file_matrice(bande):
     
     current_dir = os.path.dirname(os.path.abspath(__file__))
 
-    root_dir = os.path.dirname(current_dir)
-
-    dist_txt_path = os.path.join(root_dir,'resources','dist_v2.txt')
-    mtx_txt_path = os.path.join(root_dir,'resources','mtx.txt')
+    dist_txt_path = os.path.join(current_dir,'resources','dist_v2.txt')
+    mtx_txt_path = os.path.join(current_dir,'resources','mtx.txt')
 
 
     with open(dist_txt_path) as f_dist, open(mtx_txt_path) as f_mtx:
@@ -82,11 +80,13 @@ def undistort_bande(img_bande, mtx, dist, roi, new_camera_mtx):
         dst = dst[y:y + h, x:x + w]
         cv.imwrite(path, dst)
 
+
 def main(chemin):
     """
     Fonction principale qui gère le processus de correction des images.
     :param chemin: Chemin absolu du dossier contenant les images, suivi de /*/*.tif
     """
+    print(chemin)
     images = glob.glob(os.path.join(chemin, "*.tif"))
     images_dict = defaultdict(list)
 

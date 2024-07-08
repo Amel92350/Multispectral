@@ -1,9 +1,9 @@
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import ttk, messagebox, filedialog,scrolledtext
 from file_entry import FileEntry 
 from image_processor import ImageProcessor
 from file_tree_viewer import FileTreeApp
-from add_index_window import AddIndexWindow
+from add_calcul_window import AddCalculWindow
 from ttkthemes import ThemedTk
 from image_raster_calculator import ImageRasterCalculator
 import glob, cv2, os
@@ -13,7 +13,6 @@ class MainApplication:
         self.root = root
         self.root.title("Logiciel de traitement d'images multispectrales")
         self.root.geometry("1000x700")
-    
         self.root.set_theme("clearlooks")
         self.bg_color = self.root.tk.eval("ttk::style lookup TFrame -background")
 
@@ -45,12 +44,13 @@ class MainApplication:
         action_menu = tk.Menu(menu_bar, tearoff=0)
         menu_bar.add_cascade(label="Actions", menu=action_menu)
         action_menu.add_command(label="Lancer le traitement complet", command=lambda: self.processor.start_processing("full"))
-        action_menu.add_command(label="Créer des orthomosaïques", command=lambda: self.processor.start_processing("panoramas"))
+        action_menu.add_command(label="Lancer le traitement sur une image",command = lambda : self.processor.start_processing("one"))
+        action_menu.add_command(label="Créer des orthomosaïques", command=lambda: self.processor.start_processing("orthos"))
 
         indice_menu = tk.Menu(menu_bar, tearoff=0)
-        menu_bar.add_cascade(label="Raster", menu=indice_menu)
-        indice_menu.add_command(label="Ajouter un Raster", command=lambda: self.open_add_index_window("add"))
-        indice_menu.add_command(label="Applique Raster", command=lambda: self.open_add_index_window("applique"))
+        menu_bar.add_cascade(label="Calculs", menu=indice_menu)
+        indice_menu.add_command(label="Nouveau", command=lambda: self.open_add_index_window("add"))
+        indice_menu.add_command(label="Appliquer des calculs", command=lambda: self.open_add_index_window("applique"))
 
         help_menu = tk.Menu(menu_bar, tearoff=0)
         menu_bar.add_cascade(label="Aide", menu=help_menu)
@@ -113,7 +113,6 @@ class MainApplication:
     def open_add_index_window(self, mode):
         def on_select(indices):
             orthos_path = self.orthomosaic_pathentry.get_path()
-            orthos = glob.glob(orthos_path+"/*.tif")
             calculator = ImageRasterCalculator(orthos_path)
             for index in indices:
                 filename = os.path.basename(index).replace("txt",'tif')
@@ -123,7 +122,8 @@ class MainApplication:
                     print(expression)
                     result = calculator.evalutate_expression(expression)
                     cv2.imwrite(os.path.join(orthos_path,filename),result)
-        AddIndexWindow(self.root, on_select, mode)
+            self.file_tree_app.update_base_path(orthos_path)
+        AddCalculWindow(self.root, on_select, mode)
 
     def open_help_window(self):
         help_window = tk.Toplevel(self.root)
@@ -137,19 +137,27 @@ class MainApplication:
         - Sélectionner un dossier source contenant les images à traiter.
         - Sélectionner un dossier de destination pour les résultats.
         - Créer des orthomosaïques à partir des images sélectionnées.
-        - Ajouter et appliquer des rasters pour les traitements d'images.
+        - Ajouter et appliquer des calculs sur les orthomosaïques ou images traitées.
         - Visualiser les fichiers traités dans une arborescence.
 
         Menu :
         - Fichier : Quitter l'application.
-        - Actions : Lancer le traitement complet ou créer des orthomosaïques.
-        - Raster : Ajouter ou appliquer des rasters.
+        - Actions : Lancer le traitement complet sur une ou plusieurs images ou créer des orthomosaïques à partir d'images déjà traitées.
+        - Raster : Ajouter ou appliquer des calculs d'images.
         - Aide : Afficher cette fenêtre d'aide.
-
-        Pour plus d'informations, veuillez consulter la documentation complète ou contacter le support technique.
 
         Bonne utilisation !
         """
+
+        help_textbox = scrolledtext.ScrolledText(help_window,wrap=tk.WORD,width=60,height=20)
+        help_textbox.insert(tk.END,help_text)
+        help_textbox.pack(expand=True,fill=tk.BOTH)
+
+        text_width = max([len(line) for line in help_text.splitlines()])
+        text_height = help_text.count('\n') + 1
+
+        window_width = help_textbox.font.measure(' ') * text_width + 50 
+        window_height = help_textbox.font.metrics("linespace") * text_height + 100
 
         help_label = tk.Label(help_window, text=help_text, justify=tk.LEFT, padx=10, pady=10)
         help_label.pack(expand=True, fill=tk.BOTH)

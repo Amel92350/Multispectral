@@ -1,8 +1,7 @@
 import os
 import cv2
 import numpy as np
-import matplotlib.pyplot as plt
-import histogramme as h
+
 
 class ImageRasterCalculator:
     def __init__(self, images_folder):
@@ -96,21 +95,18 @@ class ImageRasterCalculator:
                         print("Left:", left)
                         print("Right:", right)
                         print("Result:", result)
-                        self.debug(left, right, result)
                         print("add")
                     elif op == '-':
                         result = cv2.subtract(np.float32(left), np.float32(right))
                         print(left,right,result)
-                        self.debug(left, right, result)
                         print("subtract")
                     elif op == '*':
                         result = cv2.multiply(np.float32(left), np.float32(right))
-                        self.debug(left, right, result)
+                        
                         print("multiply")
                     elif op == '/':
                         right[right == 0] = 1  # Avoid division by zero
                         result = cv2.divide(np.float32(left), np.float32(right))
-                        self.debug(left, right, result)
                         print("divide")
 
                     # Debug print of result

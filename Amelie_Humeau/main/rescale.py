@@ -196,17 +196,17 @@ def align_img(images):
     if not T:
         raise ValueError("No images were successfully converted to grayscale and saved.")
 
-    l, r, t, b = recadrage(T)
-    for i, image in enumerate(T):
-        if image is None or image.size == 0:
-            print(f"Error: Image for cropping at index {i} is empty.")
-            continue
-        h, w = image.shape
-        res = image[l:h - r, t:w - b]
-        if res is None or res.size == 0:
-            print(f"Error: Cropped image at index {i} is empty.")
-            continue
-        cv.imwrite(images[i], res)
+    # l, r, t, b = recadrage(T)
+    # for i, image in enumerate(T):
+    #     if image is None or image.size == 0:
+    #         print(f"Error: Image for cropping at index {i} is empty.")
+    #         continue
+    #     h, w = image.shape
+    #     res = image[l:h - r, t:w - b]
+    #     if res is None or res.size == 0:
+    #         print(f"Error: Cropped image at index {i} is empty.")
+    #         continue
+    #     cv.imwrite(images[i], res)
 
         
 def mediane(images, kernel):

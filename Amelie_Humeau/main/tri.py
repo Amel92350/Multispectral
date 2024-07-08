@@ -8,6 +8,15 @@ import glob
 import os
 import shutil
 
+
+def one(src_path,dest_path):
+    """
+    Tri les images dans le cas d'un seul cliché
+    """
+    if os.path.exists(dest_path+"/orthos"):
+        shutil.rmtree(dest_path+"/orthos")
+    shutil.copytree(src_path,dest_path+"/orthos")
+
 ##### main #####
 def main(src_path,dest_path):
     """
