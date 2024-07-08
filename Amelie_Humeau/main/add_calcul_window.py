@@ -90,6 +90,15 @@ class AddCalculWindow:
             add_button = ttk.Button(add_frame, text="Ajouter", command=self.on_add)
             add_button.pack(side=tk.LEFT, padx=5)
 
+    def check_calcul(self, calcul: str) -> bool:
+        constantes = ["415nm", "450nm", "570nm", "675nm", "730nm", "850nm"]
+        constantes_regex = '|'.join(re.escape(c) for c in constantes)
+
+        const_or_expr = rf'(?:{constantes_regex}|\([^()]*\))'
+        expression_regex = re.compile(rf'^\s*{const_or_expr}(?:\s*[-+*/]\s*{const_or_expr})*\s*$')
+
+        return bool(expression_regex.match(calcul))
+
     def load_indices(self):
         if not os.path.exists(self.calc_dir):
             raise FileNotFoundError(f"Le dossier '{self.calc_dir}' n'existe pas.")
