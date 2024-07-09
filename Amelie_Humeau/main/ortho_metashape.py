@@ -1,5 +1,6 @@
 import glob, os
 import Metashape 
+import shutil
 
 def get_folder_band(path:str)->str:
     bande = ""
@@ -20,6 +21,7 @@ def get_folder_band(path:str)->str:
 
 def traitement(doc:Metashape.Document,folders_path:str): 
 
+    
     folder_paths = glob.glob(os.path.join(folders_path,"*"))
     for path in folder_paths:
         bande = get_folder_band(path)
@@ -58,7 +60,11 @@ def traitement(doc:Metashape.Document,folders_path:str):
 
 
 def main(input_folder):
-    # Créer un nouveau projet
+    if os.path.exists(input_folder + "/orthos"):
+        shutil.rmtree(input_folder + "/orthos")
+
+
+    # Créer un nouveau document
     doc = Metashape.Document()
     doc.save('project.psx')
     traitement(doc,input_folder)

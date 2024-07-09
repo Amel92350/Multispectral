@@ -8,14 +8,15 @@ from threading import Thread
 import correction 
 import rescale
 import tri
-import test_metashape as meta
+import ortho_metashape as meta
+import stitch 
 
 
 class ImageProcessor:
     """
     Classe pour traiter les images en fonction des différents processus définis.
     """
-    def __init__(self, src_pathentry, dest_pathentry, orthomosaic_pathentry, status_label, progress_bar, flou_var, blur_value, tree):
+    def __init__(self, src_pathentry, dest_pathentry, orthomosaic_pathentry, status_label, progress_bar, flou_var, blur_value, tree,meta_var):
         self.src_pathentry = src_pathentry
         self.dest_pathentry = dest_pathentry
         self.orthomosaic_pathentry = orthomosaic_pathentry
@@ -26,6 +27,7 @@ class ImageProcessor:
         self.flou_var = flou_var
         self.blur_value = blur_value
         self.tree = tree
+        self.meta_var = meta_var
 
         # Configurer le logger
         logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -53,6 +55,7 @@ class ImageProcessor:
         
         apply_blur = self.flou_var.get()
         blur_value = int(self.blur_value.get()) if apply_blur else None
+        meta_var = self.meta_var.get()
 
         def process():
             """
@@ -98,11 +101,13 @@ class ImageProcessor:
 
                 if process_type == "orthos":
                     self.progress_bar.start()
-                    
+                
                 self.status_label.config(text="Création des orthomosaïques en cours...")
                 logging.info("Démarrage de la création des orthomosaïques.")
-                meta.main(dest_path)
-
+                if(meta_var):
+                    meta.main(dest_path)
+                else:
+                    stitch.main(dest_path)
                 self.status_label.config(text="Alignement en cours...")
                 logging.info("Démarrage de l'alignement.")
                 if apply_blur:

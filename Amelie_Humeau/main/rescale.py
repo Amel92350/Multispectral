@@ -253,4 +253,4 @@ def main(path,test = False,flou = None):
         align_img(images)
 
 if __name__ == "__main__" : 
-    main("C:\\Users\\AHUMEAU\\Desktop\\Pontcharaud\\donnees_triees_groupe1\\orthos",test = True)
+    main("C:\\Users\\AHUMEAU\\Desktop\\test_5000\\orthos",test = True)

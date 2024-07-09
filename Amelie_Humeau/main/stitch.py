@@ -79,8 +79,8 @@ def main(path_folder):
     Parameters:
     path_folder (str): Chemin du dossier contenant les images.
     """
-    if os.path.exists(path_folder + "/panoramas"):
-        EraseFolder(path_folder + "/panoramas")
+    if os.path.exists(path_folder + "/orthos"):
+        EraseFolder(path_folder + "/orthos")
 
     folders = glob.glob(path_folder + "/*")
 
@@ -125,13 +125,13 @@ def main(path_folder):
             result = stitched[y:y+h,x:x+w]
 
 
-            if not os.path.exists(path_folder + "/panoramas"):
-                os.makedirs(path_folder + "/panoramas")
+            if not os.path.exists(path_folder + "/orthos"):
+                os.makedirs(path_folder + "/orthos")
 
-            cv2.imwrite(path_folder + "/panoramas/" + bande + ".tif", result)
+            cv2.imwrite(path_folder + "/orthos/" + bande + ".tif", result)
 
         else:
             print(f"Échec de la génération du panorama code erreur : {status}")
 
 if __name__ == "__main__":
-    main("C:/Users/AHUMEAU/Desktop/transfert/donnees_triees_test")
+    main("C:/Users/AHUMEAU/Desktop/test_5000")

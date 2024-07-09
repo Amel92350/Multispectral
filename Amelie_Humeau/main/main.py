@@ -1,12 +1,12 @@
 import tkinter as tk
-from tkinter import ttk, messagebox, filedialog,scrolledtext
+from tkinter import ttk, messagebox, filedialog, scrolledtext
 from file_entry import FileEntry 
 from image_processor import ImageProcessor
 from file_tree_viewer import FileTreeApp
 from add_calcul_window import AddCalculWindow
 from ttkthemes import ThemedTk
 from image_raster_calculator import ImageRasterCalculator
-import glob, cv2, os
+import cv2, os
 
 class MainApplication:
     def __init__(self, root):
@@ -21,7 +21,7 @@ class MainApplication:
         self.init_widgets()
         self.processor = ImageProcessor(
             self.src_pathentry, self.dest_pathentry, self.orthomosaic_pathentry,
-            self.status_label, self.progress_bar, self.flou_var, self.blur_value, self.file_tree_app
+            self.status_label, self.progress_bar, self.flou_var, self.blur_value, self.file_tree_app,self.meta_var
         )
 
     def init_styles(self):
@@ -92,6 +92,16 @@ class MainApplication:
         self.blur_entry = ttk.Entry(flou_frame, textvariable=self.blur_value)
         flou_checkbox = ttk.Checkbutton(flou_frame, text="Appliquer une médiane", variable=self.flou_var, command=toggle_blur_entry)
         flou_checkbox.pack(expand=0, fill=tk.X)
+
+        meta_frame = ttk.Frame(labelframe)
+        meta_frame.pack(side=tk.TOP, expand=0, fill=tk.X, padx=5)
+
+        self.meta_var = tk.BooleanVar(value=True)
+        meta_checkbox = ttk.Checkbutton(meta_frame, text="Utiliser Metashape", variable=self.meta_var)
+        meta_checkbox.pack(expand=0, fill=tk.X)
+
+
+
 
         file_tree_frame = ttk.Frame(self.root)
         file_tree_frame.pack(side=tk.BOTTOM, expand=1, fill=tk.BOTH, padx=10, pady=10)

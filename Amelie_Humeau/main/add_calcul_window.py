@@ -5,6 +5,11 @@ import re
 from tkscrolledframe import ScrolledFrame  # Import ScrolledFrame
 
 class AddCalculWindow:
+
+
+    """
+    Fenêtre d'affichage pour ajouter un calcul ou en appliquer
+    """
     def __init__(self, parent, on_select, mode):
         self.parent = parent
         self.on_select = on_select
@@ -21,6 +26,9 @@ class AddCalculWindow:
         self.init_widgets(mode)
 
     def get_calc_dir(self):
+        """
+        Retourne le chemin absolu du dossier contenant les fichiers texte
+        """
         current_dir = os.path.dirname(os.path.abspath(__file__))
         root_dir = os.path.dirname(current_dir)
         calc_dir = os.path.join(root_dir, 'main', 'calculs')
@@ -91,6 +99,10 @@ class AddCalculWindow:
             add_button.pack(side=tk.LEFT, padx=5)
 
     def check_calcul(self, calcul: str) -> bool:
+        """
+        Vérifie que le calcule correspond à la norme définie 
+        norme : les constantes correspondent aux différente bande et les opérations +-*/
+        """
         constantes = ["415nm", "450nm", "570nm", "675nm", "730nm", "850nm"]
         constantes_regex = '|'.join(re.escape(c) for c in constantes)
 
@@ -100,6 +112,9 @@ class AddCalculWindow:
         return bool(expression_regex.match(calcul))
 
     def load_indices(self):
+        """
+        Charge les fichiers texte pour les afficher dans la fenêtre
+        """
         if not os.path.exists(self.calc_dir):
             raise FileNotFoundError(f"Le dossier '{self.calc_dir}' n'existe pas.")
         
@@ -121,6 +136,9 @@ class AddCalculWindow:
                 self.checkboxes.append((index_name, var,frame))
 
     def on_add(self):
+        """
+        Méthode pour ajouter un nouveau calcul c'est à dire créer un fichier texte
+        """
         calcul = self.calcul_entry.get()
         if self.check_calcul(calcul):
             name = self.name_entry.get()
@@ -139,6 +157,9 @@ class AddCalculWindow:
             messagebox.showwarning("Avertissement", "L'expression n'est pas valide, exemple d'expression correcte : '450nm+415nm'")
 
     def on_ok(self):
+        """
+        Lance la fonction on_select de la classe MainApplication pour appliquer les indices selecitonnés
+        """
         self.selected_indices = [index_name for index_name, var, frame in self.checkboxes if var.get()]
         for i in range(len(self.selected_indices)):
             filename = self.selected_indices[i].replace(' ','_') +".txt"
@@ -151,6 +172,9 @@ class AddCalculWindow:
             messagebox.showwarning("Avertissement", "Veuillez sélectionner un calcul à appliquer.")
             
     def on_delete(self, name):
+        """
+        Permet de supprimer un fichier texte
+        """
         filename = name.replace(' ', '_') + ".txt"
         filepath = os.path.join(self.calc_dir, filename)
         if os.path.exists(filepath):
