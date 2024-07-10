@@ -50,6 +50,9 @@ class FileTreeApp:
         self.tree.bind("<Double-1>", self.on_tree_item_click)
 
     def open_folder(self):
+        """
+        Ouvre une fenetre de dialiogue pour choisir un dossier pour peupler l'arbre
+        """
         folder_path = filedialog.askdirectory()
         if folder_path:
             self.base_path = folder_path  # Stocke le chemin de base
@@ -57,13 +60,19 @@ class FileTreeApp:
             self.populate_tree(folder_path)
 
     def populate_tree(self, folder_path, parent=''):
+        """
+        Peuple l'arbre récursivement avec le chemin de dossier donné 
+        """
         for item in os.listdir(folder_path):
             item_path = os.path.join(folder_path, item)
             item_id = self.tree.insert(parent, 'end', text=item, open=False)
             if os.path.isdir(item_path):
                 self.populate_tree(item_path, item_id)
 
-    def on_tree_item_click(self, event):
+    def on_tree_item_click(self):
+        """
+        Permet de gérer l'évenement quand on clique sur l'image, lance la méthode pour afficher l'image
+        """
         selected_item = self.tree.selection()[0]
         item_path = self.get_full_path(selected_item)
 
@@ -71,6 +80,9 @@ class FileTreeApp:
             self.display_image(item_path)
 
     def get_full_path(self, item):
+        """
+        récupère le chemin complet de l'image
+        """
         parts = []
         while item:
             parts.insert(0, self.tree.item(item, 'text'))
@@ -78,6 +90,9 @@ class FileTreeApp:
         return os.path.join(self.base_path, *parts)
 
     def display_image(self, path):
+        """
+        Affiche l'image
+        """
         try:
             # Load original image
             original_image = Image.open(path)
@@ -106,6 +121,9 @@ class FileTreeApp:
         self.canvas.config(scrollregion=self.canvas.bbox(self.image_id))
 
     def zoom_image(self, event):
+        """
+        Permet de zoomer sur l'image avec la molette de la souris
+        """
         # Calculate zoom factor based on mouse wheel or button clicks
         if event.num == 4 or event.delta > 0:  # Scroll up
             self.zoom_factor *= 1.1
@@ -133,7 +151,10 @@ class FileTreeApp:
         self.canvas.xview_moveto(mouse_x / new_width)
         self.canvas.yview_moveto(mouse_y / new_height)
 
-    def reset_zoom(self, event):
+    def reset_zoom(self):
+        """
+        Réinitialise la position de l'image
+        """
         # Reset zoom factor to 1.0 (original size)
         self.zoom_factor = 1.0
         # Redisplay the original image
@@ -141,6 +162,9 @@ class FileTreeApp:
 
 
     def update_base_path(self,base_path):
+        """
+        Met à jour le chemin de l'arbre et peple l'arbre avec ce chemin
+        """
         self.base_path=base_path
         self.tree.delete(*self.tree.get_children())
         if os.path.isdir(base_path):

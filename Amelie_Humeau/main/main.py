@@ -49,8 +49,8 @@ class MainApplication:
 
         indice_menu = tk.Menu(menu_bar, tearoff=0)
         menu_bar.add_cascade(label="Calculs", menu=indice_menu)
-        indice_menu.add_command(label="Nouveau", command=lambda: self.open_add_index_window("add"))
-        indice_menu.add_command(label="Appliquer des calculs", command=lambda: self.open_add_index_window("applique"))
+        indice_menu.add_command(label="Nouveau", command=lambda: self.open_add_calcul_window("add"))
+        indice_menu.add_command(label="Appliquer des calculs", command=lambda: self.open_add_calcul_window("applique"))
 
         help_menu = tk.Menu(menu_bar, tearoff=0)
         menu_bar.add_cascade(label="Aide", menu=help_menu)
@@ -120,14 +120,14 @@ class MainApplication:
         else:
             messagebox.showinfo("Information", "Attendez que le traitement soit terminé avant de quitter.")
 
-    def open_add_index_window(self, mode):
-        def on_select(indices):
+    def open_add_calcul_window(self, mode):
+        def on_select(calculs):
             orthos_path = self.orthomosaic_pathentry.get_path()
             calculator = ImageRasterCalculator(orthos_path)
-            for index in indices:
-                filename = os.path.basename(index).replace("txt",'tif')
-                with open(index,"r") as index_f:
-                    expression = index_f.readlines()[0]
+            for calcul in calculs:
+                filename = os.path.basename(calcul).replace("txt",'tif')
+                with open(calcul,"r") as calcul_f:
+                    expression = calcul_f.readlines()[0]
                 if expression:
                     print(expression)
                     result = calculator.evalutate_expression(expression)
@@ -162,15 +162,6 @@ class MainApplication:
         help_textbox = scrolledtext.ScrolledText(help_window,wrap=tk.WORD,width=60,height=20)
         help_textbox.insert(tk.END,help_text)
         help_textbox.pack(expand=True,fill=tk.BOTH)
-
-        text_width = max([len(line) for line in help_text.splitlines()])
-        text_height = help_text.count('\n') + 1
-
-        window_width = help_textbox.font.measure(' ') * text_width + 50 
-        window_height = help_textbox.font.metrics("linespace") * text_height + 100
-
-        help_label = tk.Label(help_window, text=help_text, justify=tk.LEFT, padx=10, pady=10)
-        help_label.pack(expand=True, fill=tk.BOTH)
 
 def main():
     root = ThemedTk(theme="clearlooks")

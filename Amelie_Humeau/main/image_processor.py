@@ -23,7 +23,6 @@ class ImageProcessor:
         self.status_label = status_label
         self.progress_bar = progress_bar
         self.processing = False
-        self.cancelled = False
         self.flou_var = flou_var
         self.blur_value = blur_value
         self.tree = tree
@@ -87,7 +86,7 @@ class ImageProcessor:
                         self.status_label.config(text="Alignement en cours...")
                         logging.info("Démarrage de l'alignement.")
                         
-                        rescale.main(os.path.join(dest_path, "orthos"), test=True, flou=blur_value)
+                        rescale.main(os.path.join(dest_path, "orthos"), onedir=True, flou=blur_value)
                         self.status_label.config(text="Terminé.")
                         self.progress_bar.stop()
                         logging.info("Traitement terminé.")
@@ -95,6 +94,7 @@ class ImageProcessor:
                         return
                         
                     correction.main(new_src_path+"/*")
+                    rescale.main(new_src_path+"/*")
                     self.status_label.config(text="Tri en cours...")
                     logging.info("Démarrage du tri.")
                     tri.main(new_src_path, dest_path)
@@ -111,9 +111,9 @@ class ImageProcessor:
                 self.status_label.config(text="Alignement en cours...")
                 logging.info("Démarrage de l'alignement.")
                 if apply_blur:
-                    rescale.main(os.path.join(dest_path, "orthos"), test=True, flou=blur_value)
+                    rescale.main(os.path.join(dest_path, "orthos"), onedir=True, flou=blur_value)
                 else:
-                    rescale.main(os.path.join(dest_path, "orthos"), test=True)
+                    rescale.main(os.path.join(dest_path, "orthos"), onedir=True)
 
                 self.status_label.config(text="Terminé.")
                 self.progress_bar.stop()
@@ -137,9 +137,3 @@ class ImageProcessor:
 
         Thread(target=process).start()
 
-    def cancel_processing(self):
-        """
-        Annule le traitement en cours.
-        """
-        self.cancelled = True
-        logging.info("Annulation du traitement en cours.")

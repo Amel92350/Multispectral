@@ -20,7 +20,10 @@ def get_folder_band(path:str)->str:
     return bande
 
 def traitement(doc:Metashape.Document,folders_path:str): 
-
+    
+    """
+    Fonction pour le traitement itératif des images avec Metashape
+    """
     
     folder_paths = glob.glob(os.path.join(folders_path,"*"))
     for path in folder_paths:

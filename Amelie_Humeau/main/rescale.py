@@ -145,7 +145,7 @@ def resize_images_to_common_dimensions(images):
                 print(f"Error processing {path}: {e}")
 
 
-def align_img(images):
+def align_img(images,recadre = False):
     """
     Aligne les images.
 
@@ -196,17 +196,18 @@ def align_img(images):
     if not T:
         raise ValueError("No images were successfully converted to grayscale and saved.")
 
-    # l, r, t, b = recadrage(T)
-    # for i, image in enumerate(T):
-    #     if image is None or image.size == 0:
-    #         print(f"Error: Image for cropping at index {i} is empty.")
-    #         continue
-    #     h, w = image.shape
-    #     res = image[l:h - r, t:w - b]
-    #     if res is None or res.size == 0:
-    #         print(f"Error: Cropped image at index {i} is empty.")
-    #         continue
-    #     cv.imwrite(images[i], res)
+    if recadre:
+        l, r, t, b = recadrage(T)
+        for i, image in enumerate(T):
+            if image is None or image.size == 0:
+                print(f"Error: Image for cropping at index {i} is empty.")
+                continue
+            h, w = image.shape
+            res = image[l:h - r, t:w - b]
+            if res is None or res.size == 0:
+                print(f"Error: Cropped image at index {i} is empty.")
+                continue
+            cv.imwrite(images[i], res)
 
         
 def mediane(images, kernel):
@@ -228,14 +229,14 @@ def mediane(images, kernel):
 
 ##### main #####
 
-def main(path,test = False,flou = None):
+def main(path,onedir = False,flou = None):
 
     """
     Entrez le chemin absolue du dossier dans lequel 
     se trouve les images, suivie de /*/*.tif
     """
 
-    if test:
+    if onedir:
 
         images = glob.glob(path+ "/*.tif")
         if flou is not None:
@@ -246,11 +247,12 @@ def main(path,test = False,flou = None):
 
         return 0
     files = glob.glob(path)
-
+    print(files)
     for file in files:
-        images = glob.glob(file+"/*.tif")          
-        resize_images_to_common_dimensions(images)
-        align_img(images)
+        images = glob.glob(file+"/*.tif")
+        if images:
+            resize_images_to_common_dimensions(images)
+            align_img(images,recadre=True)
 
 if __name__ == "__main__" : 
-    main("C:\\Users\\AHUMEAU\\Desktop\\test_5000\\orthos",test = True)
+    main("C:\\Users\\AHUMEAU\\Desktop\\test_10000\\orthos",onedir = True)

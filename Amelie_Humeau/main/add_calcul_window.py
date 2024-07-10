@@ -57,10 +57,10 @@ class AddCalculWindow:
             self.checkboxes_frame.pack(expand=True, fill=tk.X)
 
             self.checkboxes = []
-            self.selected_indices = []
+            self.selected_calculs = []
 
             try:
-                self.load_indices()
+                self.load_calculs()
             except Exception as e:
                 messagebox.showerror("Erreur", f"Erreur lors du chargement des calculs : {str(e)}")
 
@@ -111,7 +111,7 @@ class AddCalculWindow:
 
         return bool(expression_regex.match(calcul))
 
-    def load_indices(self):
+    def load_calculs(self):
         """
         Charge les fichiers texte pour les afficher dans la fenêtre
         """
@@ -120,20 +120,20 @@ class AddCalculWindow:
         
         for filename in os.listdir(self.calc_dir):
             if filename.endswith(".txt"):
-                index_name = filename.replace("_", " ").replace(".txt", "")
+                calcul_name = filename.replace("_", " ").replace(".txt", "")
 
                 var = tk.BooleanVar(value=True)
 
                 frame = ttk.Frame(self.checkboxes_frame)  # Use checkboxes_frame for checkboxes
                 frame.pack(anchor=tk.W, expand=True,fill=tk.X,padx=5,pady=5)
 
-                checkbox = ttk.Checkbutton(frame, text=index_name, variable=var)
+                checkbox = ttk.Checkbutton(frame, text=calcul_name, variable=var)
                 checkbox.pack(anchor=tk.W,side=tk.LEFT, fill=tk.X, expand=True)  # Ensure Checkbutton fills horizontally
 
-                delete_button = ttk.Button(frame, text="❌", command=lambda name=index_name: self.on_delete(name))
+                delete_button = ttk.Button(frame, text="❌", command=lambda name=calcul_name: self.on_delete(name))
                 delete_button.pack(side=tk.RIGHT, padx=5)  # Adjust padding for the delete button
 
-                self.checkboxes.append((index_name, var,frame))
+                self.checkboxes.append((calcul_name, var,frame))
 
     def on_add(self):
         """
@@ -160,13 +160,13 @@ class AddCalculWindow:
         """
         Lance la fonction on_select de la classe MainApplication pour appliquer les indices selecitonnés
         """
-        self.selected_indices = [index_name for index_name, var, frame in self.checkboxes if var.get()]
-        for i in range(len(self.selected_indices)):
-            filename = self.selected_indices[i].replace(' ','_') +".txt"
+        self.selected_calculs = [calcul_name for calcul_name, var, frame in self.checkboxes if var.get()]
+        for i in range(len(self.selected_calculs)):
+            filename = self.selected_calculs[i].replace(' ','_') +".txt"
             filepath = os.path.join(self.calc_dir,filename)
-            self.selected_indices[i] = filepath
-        if self.selected_indices:
-            self.on_select(self.selected_indices)
+            self.selected_calculs[i] = filepath
+        if self.selected_calculs:
+            self.on_select(self.selected_calculs)
             self.top.destroy()
         else:
             messagebox.showwarning("Avertissement", "Veuillez sélectionner un calcul à appliquer.")
@@ -179,15 +179,16 @@ class AddCalculWindow:
         filepath = os.path.join(self.calc_dir, filename)
         if os.path.exists(filepath):
             os.remove(filepath)
-            for index_name, var, frame in self.checkboxes:
-                if index_name == name:
+            for calcul_name, var, frame in self.checkboxes:
+                if calcul_name == name:
                     frame.destroy()
-                    self.checkboxes.remove((index_name, var, frame))
+                    self.checkboxes.remove((calcul_name, var, frame))
                     break
         else:
             messagebox.showerror("Erreur", f"Le fichier '{filename}' n'existe pas.")
 
 if __name__ == "__main__":
-    root = tk.Tk()
-    test = AddCalculWindow(root, None, "applique")
-    root.mainloop()
+
+    def somme(a,b):
+        return a+b
+    print(type(somme))    
