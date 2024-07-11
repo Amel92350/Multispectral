@@ -69,7 +69,7 @@ class FileTreeApp:
             if os.path.isdir(item_path):
                 self.populate_tree(item_path, item_id)
 
-    def on_tree_item_click(self):
+    def on_tree_item_click(self,event):
         """
         Permet de gérer l'évenement quand on clique sur l'image, lance la méthode pour afficher l'image
         """

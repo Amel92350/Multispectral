@@ -86,7 +86,7 @@ class ImageProcessor:
                         self.status_label.config(text="Alignement en cours...")
                         logging.info("Démarrage de l'alignement.")
                         
-                        rescale.main(os.path.join(dest_path, "orthos"), onedir=True, flou=blur_value)
+                        rescale.main(os.path.join(dest_path, "orthos"), onedir=True, flou=blur_value,recadre=True)
                         self.status_label.config(text="Terminé.")
                         self.progress_bar.stop()
                         logging.info("Traitement terminé.")

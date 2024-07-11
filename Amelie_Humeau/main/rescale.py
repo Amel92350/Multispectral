@@ -229,7 +229,7 @@ def mediane(images, kernel):
 
 ##### main #####
 
-def main(path,onedir = False,flou = None):
+def main(path,onedir = False,flou = None,recadre=False):
 
     """
     Entrez le chemin absolue du dossier dans lequel 
@@ -243,7 +243,7 @@ def main(path,onedir = False,flou = None):
             mediane(images,flou)
         print(images)
         resize_images_to_common_dimensions(images)
-        align_img(images)        
+        align_img(images,recadre)        
 
         return 0
     files = glob.glob(path)
