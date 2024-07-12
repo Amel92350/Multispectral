@@ -145,7 +145,7 @@ def resize_images_to_common_dimensions(images):
                 print(f"Error processing {path}: {e}")
 
 
-def align_img(images,recadre = False):
+def align_img(images,kernel,recadre = False):
     """
     Aligne les images.
 
@@ -189,6 +189,8 @@ def align_img(images,recadre = False):
             print(f"Error: Processed image at index {cpt} is empty.")
             continue
         img_gray = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
+        if kernel is not None:
+            img_gray = cv.medianBlur(img_gray,kernel)
         cv.imwrite(images[cpt], img_gray)
         T.append(img_gray)
         cpt += 1
@@ -210,19 +212,6 @@ def align_img(images,recadre = False):
             cv.imwrite(images[i], res)
 
         
-def mediane(images, kernel):
-    """
-    Applique un filtre médian aux images.
-
-    Parameters:
-    images (list): Liste des chemins des images.
-    kernel (int): Taille du noyau du filtre médian.
-    """
-    for path in images:
-        print("ok")
-        img = cv.imread(path)
-        img_2 = cv.medianBlur(img,kernel)
-        cv.imwrite(path,img_2)
 
     
 
@@ -239,11 +228,9 @@ def main(path,onedir = False,flou = None,recadre=False):
     if onedir:
 
         images = glob.glob(path+ "/*.tif")
-        if flou is not None:
-            mediane(images,flou)
         print(images)
         resize_images_to_common_dimensions(images)
-        align_img(images,recadre)        
+        align_img(images,flou,recadre=recadre)        
 
         return 0
     files = glob.glob(path)
@@ -252,7 +239,7 @@ def main(path,onedir = False,flou = None,recadre=False):
         images = glob.glob(file+"/*.tif")
         if images:
             resize_images_to_common_dimensions(images)
-            align_img(images,recadre=True)
+            align_img(images,kernel=None,recadre=True)
 
 if __name__ == "__main__" : 
-    main("C:\\Users\\AHUMEAU\\Desktop\\test_10000\\orthos",onedir = True)
+    main("C:\\Users\\AHUMEAU\\Desktop\\test_expo\\test_10000\\orthos",onedir = True)

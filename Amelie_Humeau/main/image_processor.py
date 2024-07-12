@@ -11,15 +11,13 @@ import tri
 import ortho_metashape as meta
 import stitch 
 
-
 class ImageProcessor:
     """
     Classe pour traiter les images en fonction des différents processus définis.
     """
-    def __init__(self, src_pathentry, dest_pathentry, orthomosaic_pathentry, status_label, progress_bar, flou_var, blur_value, tree,meta_var):
+    def __init__(self, src_pathentry, dest_pathentry,status_label, progress_bar, flou_var, blur_value, tree, meta_var):
         self.src_pathentry = src_pathentry
         self.dest_pathentry = dest_pathentry
-        self.orthomosaic_pathentry = orthomosaic_pathentry
         self.status_label = status_label
         self.progress_bar = progress_bar
         self.processing = False
@@ -39,101 +37,139 @@ class ImageProcessor:
 
     def start_processing(self, process_type):
         """
-        Démarre le traitement des images en fonction du type de processus spécifié (full ou panoramas).
+        Démarre le traitement des images en fonction du type de processus spécifié (full, one, ou orthos).
         """
         if self.processing:
             messagebox.showwarning("Avertissement", "Un traitement est déjà en cours.")
             return
 
+        try:
+            self.validate_paths(process_type)
+            apply_blur, blur_value = self.get_blur_values()
+            meta_var = self.meta_var.get()
+
+            # Démarrer le traitement dans un thread séparé
+            Thread(target=self.process_images, args=(process_type, apply_blur, blur_value, meta_var)).start()
+        except ValueError as e:
+            messagebox.showerror("Erreur", str(e))
+            logging.error(str(e))
+
+    def validate_paths(self, process_type):
+        """
+        Valide les chemins de source et de destination.
+        """
         src_path = self.src_pathentry.get_path()
-        print(src_path)
         dest_path = self.dest_pathentry.get_path()
-        
+
+        if process_type in ["full", "one"]:
+            if not src_path:
+                raise ValueError("Le chemin source est vide")
+            if not os.path.exists(src_path):
+                raise ValueError("Le chemin source est invalide")
+
+        if not dest_path:
+            raise ValueError("Le chemin destination est vide")
         if not os.path.exists(dest_path):
             os.makedirs(dest_path)
-        
+
+    def get_blur_values(self):
+        """
+        Récupère les valeurs de flou.
+        """
         apply_blur = self.flou_var.get()
         blur_value = int(self.blur_value.get()) if apply_blur else None
-        meta_var = self.meta_var.get()
 
-        def process():
-            """
-            Fonction de traitement des images exécutée dans un thread séparé.
-            """
-            logging.info("Démarrage du processus de traitement des images.")
-            start_time = time.time()
-            self.processing = True
-            self.cancelled = False
-            try:
-                if process_type == "full" or process_type == "one":
-                    new_src_path = os.path.join(src_path, "copied_images")
-                    print(new_src_path)
-                    # Copie les images sources dans un nouveau dossier pour le traitement
-                    if os.path.exists(new_src_path):
-                        shutil.rmtree(new_src_path)
-                    shutil.copytree(src_path, new_src_path)
-                    
-                    self.status_label.config(text="Correction en cours...")
-                    self.progress_bar.start()
-                    logging.info("Démarrage de la correction.")
-                    
+        if apply_blur and (blur_value is None or blur_value % 2 == 0):
+            raise ValueError("La valeur de la médiane doit être un nombre impair.")
+        
+        return apply_blur, blur_value
 
-                    if process_type == "one":
-                        correction.main(new_src_path)
-                        self.status_label.config(text="Tri en cours...")
-                        logging.info("Démarrage du tri.")
-                        tri.one(new_src_path, dest_path)
-                        self.status_label.config(text="Alignement en cours...")
-                        logging.info("Démarrage de l'alignement.")
-                        
-                        rescale.main(os.path.join(dest_path, "orthos"), onedir=True, flou=blur_value,recadre=True)
-                        self.status_label.config(text="Terminé.")
-                        self.progress_bar.stop()
-                        logging.info("Traitement terminé.")
-                        self.tree.update_base_path(os.path.join(dest_path, "orthos"))
-                        return
-                        
-                    correction.main(new_src_path+"/*")
-                    rescale.main(new_src_path+"/*")
-                    self.status_label.config(text="Tri en cours...")
-                    logging.info("Démarrage du tri.")
-                    tri.main(new_src_path, dest_path)
+    def process_images(self, process_type, apply_blur, blur_value, meta_var):
+        """
+        Fonction de traitement des images exécutée dans un thread séparé.
+        """
+        self.processing = True
+        start_time = time.time()
 
-                if process_type == "orthos":
-                    self.progress_bar.start()
-                
-                self.status_label.config(text="Création des orthomosaïques en cours...")
-                logging.info("Démarrage de la création des orthomosaïques.")
-                if(meta_var):
-                    meta.main(dest_path)
-                else:
-                    stitch.main(dest_path)
-                self.status_label.config(text="Alignement en cours...")
-                logging.info("Démarrage de l'alignement.")
-                if apply_blur:
-                    rescale.main(os.path.join(dest_path, "orthos"), onedir=True, flou=blur_value)
-                else:
-                    rescale.main(os.path.join(dest_path, "orthos"), onedir=True)
+        try:
+            if process_type in ["full", "one"]:
+                self.process_full_or_one(process_type, blur_value)
+            
+            if process_type in ["full", "orthos"]:
+                self.create_orthomosaics(apply_blur, blur_value, meta_var)
 
-                self.status_label.config(text="Terminé.")
-                self.progress_bar.stop()
-                logging.info("Traitement terminé.")
-                elapsed_time = time.time() - start_time
-                elapsed_minutes, elapsed_seconds = divmod(elapsed_time, 60)
-                messagebox.showinfo(
-                    "Information",
-                    f"Images traitées en {int(elapsed_minutes)} minutes et {int(elapsed_seconds)} secondes."
-                    if process_type == "full" else
-                    f"Orthomosaïques créées en {int(elapsed_minutes)} minutes et {int(elapsed_seconds)} secondes."
-                )
-            except Exception as e:
-                logging.error("Erreur lors du traitement : %s", e)
-                messagebox.showerror("Erreur", str(e))
-            finally:
-                self.progress_bar.stop()
-                self.processing = False
+            elapsed_time = time.time() - start_time
+            self.show_completion_message(process_type, elapsed_time)
+        except Exception as e:
+            logging.error("Erreur lors du traitement : %s", e)
+            messagebox.showerror("Erreur", str(e))
+        finally:
+            self.processing = False
+            self.progress_bar.stop()
+            self.update_file_tree()
 
-            self.tree.update_base_path(os.path.join(dest_path, "orthos"))
+    def process_full_or_one(self, process_type, blur_value):
+        """
+        Traite les images pour les processus 'full' ou 'one'.
+        """
+        src_path = self.src_pathentry.get_path()
+        dest_path = self.dest_pathentry.get_path()
+        new_src_path = os.path.join(src_path, "copied_images")
 
-        Thread(target=process).start()
+        if os.path.exists(new_src_path):
+            shutil.rmtree(new_src_path)
+        shutil.copytree(src_path, new_src_path)
 
+        self.update_status("Correction en cours...", "Démarrage de la correction.")
+        correction.main(new_src_path if process_type == "one" else new_src_path + "/*")
+        
+        self.update_status("Tri en cours...", "Démarrage du tri.")
+        if process_type == "one":
+            tri.one(new_src_path, dest_path)
+            self.update_status("Alignement en cours...", "Démarrage de l'alignement.")
+            rescale.main(os.path.join(dest_path, "orthos"), onedir=True, flou=blur_value, recadre=True)
+        else:
+            rescale.main(new_src_path + "/*")
+            tri.main(new_src_path, dest_path)
+
+    def create_orthomosaics(self, apply_blur, blur_value, meta_var):
+        """
+        Crée des orthomosaïques à partir des images traitées.
+        """
+        dest_path = self.dest_pathentry.get_path()
+
+        self.update_status("Création des orthomosaïques en cours...", "Démarrage de la création des orthomosaïques.")
+        if meta_var:
+            meta.main(dest_path)
+        else:
+            stitch.main(dest_path)
+
+        self.update_status("Alignement en cours...", "Démarrage de l'alignement.")
+        rescale.main(os.path.join(dest_path, "orthos"), onedir=True, flou=blur_value)
+
+    def update_status(self, status_message, log_message):
+        """
+        Met à jour l'état de la barre de progression et les messages de statut.
+        """
+        self.status_label.config(text=status_message)
+        logging.info(log_message)
+        self.progress_bar.start()
+
+    def show_completion_message(self, process_type, elapsed_time):
+        """
+        Affiche un message de fin de traitement.
+        """
+        elapsed_minutes, elapsed_seconds = divmod(elapsed_time, 60)
+        messagebox.showinfo(
+            "Information",
+            f"Images traitées en {int(elapsed_minutes)} minutes et {int(elapsed_seconds)} secondes."
+            if process_type in ["full", "one"] else
+            f"Orthomosaïques créées en {int(elapsed_minutes)} minutes et {int(elapsed_seconds)} secondes."
+        )
+
+    def update_file_tree(self):
+        """
+        Met à jour l'arborescence des fichiers.
+        """
+        dest_path = self.dest_pathentry.get_path()
+        self.tree.update_base_path(os.path.join(dest_path, "orthos"))

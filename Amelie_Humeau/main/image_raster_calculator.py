@@ -86,30 +86,25 @@ class ImageRasterCalculator:
                         parts = expr.split(op)
                         left = eval_expr(parts[0])
                         right = eval_expr(parts[1])
-
-
+                        
                         #Opération sur les parties :
                         
                         if op == '+':
-
-                            # Conversion temporaire en np.float32 pour éviter le "capping"
-                            result = cv2.add(np.float32(left), np.float32(right))
-
+                            result = cv2.add(np.float32(left),np.float32(right))
+                            result = np.uint8(result)
                         elif op == '-':
 
-                            result = cv2.subtract(np.float32(left), np.float32(right))
-                            
+                            result = cv2.subtract(np.float32(left),np.float32(right))
                         elif op == '*':
 
-                            result = cv2.multiply(np.float32(left), np.float32(right))
+                            result = cv2.multiply(np.float32(left),np.float32(right))
                             
                         elif op == '/':
 
                             right[right == 0] = 1  # évite la division par zéro
                             result = cv2.divide(np.float32(left), np.float32(right))
 
-                        # Reconversion en np.uint8 si nécessaire
-                        return np.uint8(result)
+                        return result
                     
                     
                 # Gère les constantes (images)
@@ -150,12 +145,10 @@ class ImageRasterCalculator:
 # Exemple d'utilisation
 if __name__ == "__main__":
     calculator = ImageRasterCalculator("C:/Users/AHUMEAU/Desktop/Pontcharaud/donnees_triees_groupe4/orthos")
-    calculator.images = {
-        '415nm': np.uint8([[2]]),
-        '450nm': np.uint8([[1]]) 
-    }
+    
+    
 
-    expression =  '415nm * 450nm'
+    expression =  '415nm + 450nm'
 
     result = calculator.evalutate_expression(expression)
     print(result)

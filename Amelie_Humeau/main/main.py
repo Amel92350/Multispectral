@@ -20,7 +20,7 @@ class MainApplication:
         self.init_menu()
         self.init_widgets()
         self.processor = ImageProcessor(
-            self.src_pathentry, self.dest_pathentry, self.orthomosaic_pathentry,
+            self.src_pathentry, self.dest_pathentry, 
             self.status_label, self.progress_bar, self.flou_var, self.blur_value, self.file_tree_app,self.meta_var
         )
 
@@ -62,11 +62,9 @@ class MainApplication:
 
         self.src_pathentry = FileEntry(labelframe, label="Dossier source : ")
         self.dest_pathentry = FileEntry(labelframe, label="Dossier destination : ")
-        self.orthomosaic_pathentry = FileEntry(labelframe, label="Dossier des orthomosaïques")
 
         self.src_pathentry.pack(expand=0, fill=tk.X, pady=5)
         self.dest_pathentry.pack(expand=0, fill=tk.X, pady=5)
-        self.orthomosaic_pathentry.pack(expand=0, fill=tk.X, pady=5)
 
         status_frame = ttk.LabelFrame(labelframe, text="Statut", padding="10px")
         status_frame.pack(side=tk.BOTTOM, expand=1, fill=tk.X, padx=5, pady=5)
@@ -81,7 +79,7 @@ class MainApplication:
         flou_frame.pack(side=tk.TOP, expand=0, fill=tk.X, padx=5)
 
         self.flou_var = tk.BooleanVar()
-        self.blur_value = tk.StringVar()
+        self.blur_value = tk.StringVar(value=11)
 
         def toggle_blur_entry():
             if self.flou_var.get():
@@ -108,10 +106,12 @@ class MainApplication:
         self.file_tree_app = FileTreeApp(file_tree_frame)
 
         def update_file_tree_app(*args):
-            dest_path = self.orthomosaic_pathentry.get_path()
-            self.file_tree_app.update_base_path(dest_path)
+            dest_path = self.dest_pathentry.get_path()
+            orthos_path = os.path.join(dest_path,"orthos")
+            self.file_tree_app.update_base_path(orthos_path)
 
-        self.orthomosaic_pathentry.folder_path.trace_add("write", update_file_tree_app)
+        
+        self.dest_pathentry.folder_path.trace_add("write", update_file_tree_app)
         ttk.Sizegrip(self.root).pack(side=tk.RIGHT, expand=0, fill=tk.Y, padx=5, pady=5)
 
     def quit_app(self):
@@ -122,7 +122,7 @@ class MainApplication:
 
     def open_add_calcul_window(self, mode):
         def on_select(calculs):
-            orthos_path = self.orthomosaic_pathentry.get_path()
+            orthos_path = os.path.join(self.dest_pathentry.get_path(),"orthos")
             calculator = ImageRasterCalculator(orthos_path)
             for calcul in calculs:
                 filename = os.path.basename(calcul).replace("txt",'tif')

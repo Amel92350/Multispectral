@@ -53,11 +53,7 @@ class FileTreeApp:
         """
         Ouvre une fenetre de dialiogue pour choisir un dossier pour peupler l'arbre
         """
-        folder_path = filedialog.askdirectory()
-        if folder_path:
-            self.base_path = folder_path  # Stocke le chemin de base
-            self.tree.delete(*self.tree.get_children())
-            self.populate_tree(folder_path)
+        os.startfile(self.base_path)
 
     def populate_tree(self, folder_path, parent=''):
         """
@@ -151,7 +147,7 @@ class FileTreeApp:
         self.canvas.xview_moveto(mouse_x / new_width)
         self.canvas.yview_moveto(mouse_y / new_height)
 
-    def reset_zoom(self):
+    def reset_zoom(self,event):
         """
         Réinitialise la position de l'image
         """
