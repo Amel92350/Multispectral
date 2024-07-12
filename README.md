@@ -19,7 +19,7 @@ Ce repository contient le code source d'un logiciel de traitement d'images multi
 * NumPy
 * Pillow
 * Matplotlib
-* licence Metashape 
+* licence Agisoft Metashape Professional
 
 ## Installation
 
