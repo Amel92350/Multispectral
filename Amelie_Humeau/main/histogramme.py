@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import glob, os, cv2
+from PIL import Image
 
 def calculer_histogramme(img):
     """
@@ -68,7 +69,7 @@ def main(input_folder):
     for path in image_paths:
         print(path)
         if os.path.isfile(path):
-            image = cv2.imread(path)
+            image = np.array(Image.open(path))
             etiree = etirer_min_max(image)
             cv2.imwrite(path,etiree)
 

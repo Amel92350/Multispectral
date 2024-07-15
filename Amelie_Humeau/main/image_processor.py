@@ -10,6 +10,7 @@ import rescale
 import tri
 import ortho_metashape as meta
 import stitch 
+import histogramme as h
 
 class ImageProcessor:
     """
@@ -62,15 +63,18 @@ class ImageProcessor:
         dest_path = self.dest_pathentry.get_path()
 
         if process_type in ["full", "one"]:
-            if not src_path:
-                raise ValueError("Le chemin source est vide")
+            if not dest_path:
+                raise ValueError("Le chemin destination est vide")
             if not os.path.exists(src_path):
-                raise ValueError("Le chemin source est invalide")
+                raise ValueError("Le chemin  est invalide")
+            if not os.path.exists(dest_path):
+                os.makedirs(dest_path)
 
-        if not dest_path:
-            raise ValueError("Le chemin destination est vide")
-        if not os.path.exists(dest_path):
-            os.makedirs(dest_path)
+        if not src_path:
+            raise ValueError("Le chemin source est vide")
+        if not os.path.exists(src_path):
+                raise ValueError("Le chemin source est invalide")
+        
 
     def get_blur_values(self):
         """
@@ -90,13 +94,16 @@ class ImageProcessor:
         """
         self.processing = True
         start_time = time.time()
+        src_path = self.src_pathentry.get_path()
+        dest_path = self.dest_pathentry.get_path()
 
         try:
             if process_type in ["full", "one"]:
                 self.process_full_or_one(process_type, blur_value)
+                self.update_file_tree(os.path.join(dest_path))
             
             if process_type in ["full", "orthos"]:
-                self.create_orthomosaics(apply_blur, blur_value, meta_var)
+                self.create_orthomosaics( blur_value, meta_var,src_path if process_type=="orthos" else dest_path)
 
             elapsed_time = time.time() - start_time
             self.show_completion_message(process_type, elapsed_time)
@@ -106,7 +113,7 @@ class ImageProcessor:
         finally:
             self.processing = False
             self.progress_bar.stop()
-            self.update_file_tree()
+            
 
     def process_full_or_one(self, process_type, blur_value):
         """
@@ -131,21 +138,21 @@ class ImageProcessor:
         else:
             rescale.main(new_src_path + "/*")
             tri.main(new_src_path, dest_path)
-
-    def create_orthomosaics(self, apply_blur, blur_value, meta_var):
+            
+    def create_orthomosaics(self, blur_value, meta_var,path):
         """
         Crée des orthomosaïques à partir des images traitées.
         """
-        dest_path = self.dest_pathentry.get_path()
-
         self.update_status("Création des orthomosaïques en cours...", "Démarrage de la création des orthomosaïques.")
         if meta_var:
-            meta.main(dest_path)
+            meta.main(path)
         else:
-            stitch.main(dest_path)
+            stitch.main(path)
 
         self.update_status("Alignement en cours...", "Démarrage de l'alignement.")
-        rescale.main(os.path.join(dest_path, "orthos"), onedir=True, flou=blur_value)
+        rescale.main(os.path.join(path, "orthos"), onedir=True, flou=blur_value)
+        
+        self.update_file_tree(path)
 
     def update_status(self, status_message, log_message):
         """
@@ -167,9 +174,8 @@ class ImageProcessor:
             f"Orthomosaïques créées en {int(elapsed_minutes)} minutes et {int(elapsed_seconds)} secondes."
         )
 
-    def update_file_tree(self):
+    def update_file_tree(self,path):
         """
         Met à jour l'arborescence des fichiers.
         """
-        dest_path = self.dest_pathentry.get_path()
-        self.tree.update_base_path(os.path.join(dest_path, "orthos"))
+        self.tree.update_base_path(os.path.join(path, "orthos"))

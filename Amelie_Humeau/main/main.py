@@ -25,6 +25,7 @@ class MainApplication:
         )
 
     def init_styles(self):
+
         style = ttk.Style()
         style.configure('TButton', font=('Helvetica', 10))
         style.configure('TLabel', font=('Helvetica', 12))
@@ -34,6 +35,7 @@ class MainApplication:
         style.configure('TFrame', background=self.bg_color)
 
     def init_menu(self):
+
         menu_bar = tk.Menu(self.root)
         self.root.config(menu=menu_bar)
 
@@ -57,6 +59,7 @@ class MainApplication:
         help_menu.add_command(label="Aide", command=self.open_help_window)
 
     def init_widgets(self):
+
         labelframe = ttk.LabelFrame(self.root, text="Bienvenue", padding="10px")
         labelframe.pack(side=tk.TOP, expand=1, fill=tk.BOTH, padx=10, pady=10)
 
@@ -82,6 +85,7 @@ class MainApplication:
         self.blur_value = tk.StringVar(value=11)
 
         def toggle_blur_entry():
+
             if self.flou_var.get():
                 self.blur_entry.pack(side=tk.LEFT, expand=0, padx=5)
             else:
@@ -90,6 +94,7 @@ class MainApplication:
         self.blur_entry = ttk.Entry(flou_frame, textvariable=self.blur_value)
         flou_checkbox = ttk.Checkbutton(flou_frame, text="Appliquer une médiane", variable=self.flou_var, command=toggle_blur_entry)
         flou_checkbox.pack(expand=0, fill=tk.X)
+        
 
         meta_frame = ttk.Frame(labelframe)
         meta_frame.pack(side=tk.TOP, expand=0, fill=tk.X, padx=5)
@@ -105,7 +110,12 @@ class MainApplication:
         file_tree_frame.pack(side=tk.BOTTOM, expand=1, fill=tk.BOTH, padx=10, pady=10)
         self.file_tree_app = FileTreeApp(file_tree_frame)
 
+    
+
         def update_file_tree_app(*args):
+            """
+            Mets à jour l'arbre du FileTreeApp en fonction du dest_pathentry
+            """
             dest_path = self.dest_pathentry.get_path()
             orthos_path = os.path.join(dest_path,"orthos")
             self.file_tree_app.update_base_path(orthos_path)
@@ -121,8 +131,11 @@ class MainApplication:
             messagebox.showinfo("Information", "Attendez que le traitement soit terminé avant de quitter.")
 
     def open_add_calcul_window(self, mode):
+        """
+        Ouvre la fenetre de calcul en fonction du mode : add ou applique
+        """
         def on_select(calculs):
-            orthos_path = os.path.join(self.dest_pathentry.get_path(),"orthos")
+            orthos_path = self.file_tree_app.base_path
             calculator = ImageRasterCalculator(orthos_path)
             for calcul in calculs:
                 filename = os.path.basename(calcul).replace("txt",'tif')
@@ -133,9 +146,14 @@ class MainApplication:
                     result = calculator.evalutate_expression(expression)
                     cv2.imwrite(os.path.join(orthos_path,filename),result)
             self.file_tree_app.update_base_path(orthos_path)
+
         AddCalculWindow(self.root, on_select, mode)
 
     def open_help_window(self):
+        """
+        Ouvre la fenêtre d'aide et affiche des informations
+        """
+
         help_window = tk.Toplevel(self.root)
         help_window.title("Aide")
         help_window.geometry("600x400")
@@ -148,13 +166,15 @@ class MainApplication:
         - Sélectionner un dossier de destination pour les résultats.
         - Créer des orthomosaïques à partir des images sélectionnées.
         - Ajouter et appliquer des calculs sur les orthomosaïques ou images traitées.
-        - Visualiser les fichiers traités dans une arborescence.
+        - Visualiser les images ou orthomosaïques dans une arborescence.
 
         Menu :
         - Fichier : Quitter l'application.
         - Actions : Lancer le traitement complet sur une ou plusieurs images ou créer des orthomosaïques à partir d'images déjà traitées.
         - Raster : Ajouter ou appliquer des calculs d'images.
         - Aide : Afficher cette fenêtre d'aide.
+
+        Cliquez sur le bouton "Ouvrir" pour ouvrir le chemin des images dans l'explorateur de fichiers
 
         Bonne utilisation !
         """

@@ -2,8 +2,8 @@ import os
 import cv2
 import numpy as np
 
-
 class ImageRasterCalculator:
+
     def __init__(self, images_folder):
         self.images_folder = images_folder
         self.image_files = self.get_image_files(images_folder)
@@ -90,14 +90,14 @@ class ImageRasterCalculator:
                         #Opération sur les parties :
                         
                         if op == '+':
-                            result = cv2.add(np.float32(left),np.float32(right))
-                            result = np.uint8(result)
+                            result = cv2.add(left,right)
+                            
                         elif op == '-':
 
-                            result = cv2.subtract(np.float32(left),np.float32(right))
+                            result = cv2.subtract(left,right)
                         elif op == '*':
 
-                            result = cv2.multiply(np.float32(left),np.float32(right))
+                            result = cv2.multiply(left,right)
                             
                         elif op == '/':
 

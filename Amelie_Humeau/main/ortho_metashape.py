@@ -66,7 +66,6 @@ def main(input_folder):
     if os.path.exists(input_folder + "/orthos"):
         shutil.rmtree(input_folder + "/orthos")
 
-
     # Créer un nouveau document
     doc = Metashape.Document()
     doc.save('project.psx')
