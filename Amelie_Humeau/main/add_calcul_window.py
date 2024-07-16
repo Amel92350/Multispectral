@@ -104,7 +104,7 @@ class AddCalculWindow:
             add_button = ttk.Button(add_frame, text="Ajouter", command=self.on_add)
             add_button.pack(side=tk.LEFT, padx=5)
 
-            cancel_button = ttk.Button(button_frame, text="Annuler", command=self.top.destroy)
+            cancel_button = ttk.Button(add_frame, text="Annuler", command=self.top.destroy)
             cancel_button.pack(side=tk.LEFT, padx=5)
 
     def check_calcul(self, calcul: str) -> bool:
