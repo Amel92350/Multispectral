@@ -13,15 +13,21 @@ class AddCalculWindow:
     def __init__(self, parent, on_select, mode):
         self.parent = parent
         self.on_select = on_select
+
+        #Crée une nouvelle fenêtre qui reste au premier plan
         self.top = tk.Toplevel(parent)
         self.top.grab_set()
         self.top.focus_set()
         self.top.title("Calculs")
-        self.width = 500
+
         self.top.geometry("600x500")
+
+        #Récupère le chemin de dossier qui contient les calculs 
         self.calc_dir = self.get_calc_dir()
+        
         self.mode = mode
 
+        #initialise les styles et les objets de la fenêtre
         self.init_styles()
         self.init_widgets(mode)
 
@@ -98,10 +104,13 @@ class AddCalculWindow:
             add_button = ttk.Button(add_frame, text="Ajouter", command=self.on_add)
             add_button.pack(side=tk.LEFT, padx=5)
 
+            cancel_button = ttk.Button(button_frame, text="Annuler", command=self.top.destroy)
+            cancel_button.pack(side=tk.LEFT, padx=5)
+
     def check_calcul(self, calcul: str) -> bool:
         """
         Vérifie que le calcule correspond à la norme définie 
-        norme : les constantes correspondent aux différente bande et les opérations +-*/
+        : les constantes correspondent aux différentes bandes et les opérations +-*/
         """
         constantes = ["415nm", "450nm", "570nm", "675nm", "730nm", "850nm"]
         constantes_regex = '|'.join(re.escape(c) for c in constantes)
@@ -158,7 +167,7 @@ class AddCalculWindow:
 
     def on_ok(self):
         """
-        Lance la fonction on_select de la classe MainApplication pour appliquer les indices selecitonnés
+        Lance la fonction on_select de la classe MainApplication pour appliquer les indices selectionnés
         """
         self.selected_calculs = [calcul_name for calcul_name, var, frame in self.checkboxes if var.get()]
         for i in range(len(self.selected_calculs)):

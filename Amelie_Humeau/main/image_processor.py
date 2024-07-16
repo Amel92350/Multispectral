@@ -16,7 +16,7 @@ class ImageProcessor:
     """
     Classe pour traiter les images en fonction des différents processus définis.
     """
-    def __init__(self, src_pathentry, dest_pathentry,status_label, progress_bar, flou_var, blur_value, tree, meta_var):
+    def __init__(self, src_pathentry, dest_pathentry,status_label, progress_bar, flou_var, blur_value, tree,method_value):
         self.src_pathentry = src_pathentry
         self.dest_pathentry = dest_pathentry
         self.status_label = status_label
@@ -25,7 +25,7 @@ class ImageProcessor:
         self.flou_var = flou_var
         self.blur_value = blur_value
         self.tree = tree
-        self.meta_var = meta_var
+        self.method_value = method_value
 
         # Configurer le logger
         logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -47,10 +47,10 @@ class ImageProcessor:
         try:
             self.validate_paths(process_type)
             apply_blur, blur_value = self.get_blur_values()
-            meta_var = self.meta_var.get()
+            method_value = self.method_value.get()
 
             # Démarrer le traitement dans un thread séparé
-            Thread(target=self.process_images, args=(process_type, apply_blur, blur_value, meta_var)).start()
+            Thread(target=self.process_images, args=(process_type, apply_blur, blur_value, method_value)).start()
         except ValueError as e:
             messagebox.showerror("Erreur", str(e))
             logging.error(str(e))
@@ -88,7 +88,7 @@ class ImageProcessor:
         
         return apply_blur, blur_value
 
-    def process_images(self, process_type, apply_blur, blur_value, meta_var):
+    def process_images(self, process_type, apply_blur, blur_value, method_value):
         """
         Fonction de traitement des images exécutée dans un thread séparé.
         """
@@ -103,7 +103,7 @@ class ImageProcessor:
                 self.update_file_tree(os.path.join(dest_path))
             
             if process_type in ["full", "orthos"]:
-                self.create_orthomosaics( blur_value, meta_var,src_path if process_type=="orthos" else dest_path)
+                self.create_orthomosaics( blur_value, method_value,src_path if process_type=="orthos" else dest_path)
 
             elapsed_time = time.time() - start_time
             self.show_completion_message(process_type, elapsed_time)
@@ -121,8 +121,9 @@ class ImageProcessor:
         """
         src_path = self.src_pathentry.get_path()
         dest_path = self.dest_pathentry.get_path()
-        new_src_path = os.path.join(src_path, "copied_images")
 
+        #Copier les images dans un autre dossier pour éviter de faire le traitement sur les images originales
+        new_src_path = os.path.join(src_path, "copied_images")
         if os.path.exists(new_src_path):
             shutil.rmtree(new_src_path)
         shutil.copytree(src_path, new_src_path)
@@ -139,15 +140,20 @@ class ImageProcessor:
             rescale.main(new_src_path + "/*")
             tri.main(new_src_path, dest_path)
             
-    def create_orthomosaics(self, blur_value, meta_var,path):
+    def create_orthomosaics(self, blur_value, method_value,path):
         """
-        Crée des orthomosaïques à partir des images traitées.
+        Crée des orthomosaïques à partir des images traitées en fonction de la méthode.
         """
         self.update_status("Création des orthomosaïques en cours...", "Démarrage de la création des orthomosaïques.")
-        if meta_var:
+
+        #On va lancer la méthode Stitch, Metashape ou Micmac en fonction du bouton coché.
+        if method_value=="meta":
             meta.main(path)
-        else:
+        elif method_value=="stitch":
             stitch.main(path)
+        elif method_value=="micmac":
+            # TODO : Ici faire appel à la fonction principale de traitement d'un fichier micmac.py
+            raise ValueError("Erreur, Micmac n'est pas initialisé")
 
         self.update_status("Alignement en cours...", "Démarrage de l'alignement.")
         rescale.main(os.path.join(path, "orthos"), onedir=True, flou=blur_value)

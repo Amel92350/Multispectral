@@ -127,21 +127,6 @@ class ImageRasterCalculator:
             
         return eval_expr(expression)
 
-    def save_image(self, image, output_path):
-        """
-        Enregistre l'image résultante à l'emplacement spécifié.
-        """
-        try:
-            extension = os.path.splitext(output_path)[1].lower()
-            if extension not in ['.tif', '.tiff', '.png', '.jpg', '.jpeg']:
-                raise ValueError("Extension de fichier non supportée pour l'enregistrement.")
-            
-            success = cv2.imwrite(output_path, image)
-            if not success:
-                raise IOError(f"Erreur lors de l'enregistrement de l'image à {output_path}")
-        except Exception as e:
-            print(f"Erreur lors de l'enregistrement de l'image : {str(e)}")
-
 # Exemple d'utilisation
 if __name__ == "__main__":
     calculator = ImageRasterCalculator("C:/Users/AHUMEAU/Desktop/Pontcharaud/donnees_triees_groupe4/orthos")

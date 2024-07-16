@@ -21,7 +21,7 @@ class MainApplication:
         self.init_widgets()
         self.processor = ImageProcessor(
             self.src_pathentry, self.dest_pathentry, 
-            self.status_label, self.progress_bar, self.flou_var, self.blur_value, self.file_tree_app,self.meta_var
+            self.status_label, self.progress_bar, self.flou_var, self.blur_value, self.file_tree_app,self.method_value
         )
 
     def init_styles(self):
@@ -39,21 +39,25 @@ class MainApplication:
         menu_bar = tk.Menu(self.root)
         self.root.config(menu=menu_bar)
 
+        # Initialise le menu Fichier
         file_menu = tk.Menu(menu_bar, tearoff=0)
         menu_bar.add_cascade(label="Fichier", menu=file_menu)
         file_menu.add_command(label="Quitter", command=self.quit_app)
-
+        
+        # Initialise le menu Action
         action_menu = tk.Menu(menu_bar, tearoff=0)
         menu_bar.add_cascade(label="Actions", menu=action_menu)
         action_menu.add_command(label="Lancer le traitement complet", command=lambda: self.processor.start_processing("full"))
         action_menu.add_command(label="Lancer le traitement sur une image",command = lambda : self.processor.start_processing("one"))
         action_menu.add_command(label="Créer des orthomosaïques", command=lambda: self.processor.start_processing("orthos"))
 
-        indice_menu = tk.Menu(menu_bar, tearoff=0)
-        menu_bar.add_cascade(label="Calculs", menu=indice_menu)
-        indice_menu.add_command(label="Nouveau", command=lambda: self.open_add_calcul_window("add"))
-        indice_menu.add_command(label="Appliquer des calculs", command=lambda: self.open_add_calcul_window("applique"))
+        # Initialise le menu Calculs
+        calculs_menu = tk.Menu(menu_bar, tearoff=0)
+        menu_bar.add_cascade(label="Calculs", menu=calculs_menu)
+        calculs_menu.add_command(label="Nouveau", command=lambda: self.open_add_calcul_window("add"))
+        calculs_menu.add_command(label="Appliquer des calculs", command=lambda: self.open_add_calcul_window("applique"))
 
+        #Initialise le menu Aide
         help_menu = tk.Menu(menu_bar, tearoff=0)
         menu_bar.add_cascade(label="Aide", menu=help_menu)
         help_menu.add_command(label="Aide", command=self.open_help_window)
@@ -63,21 +67,22 @@ class MainApplication:
         labelframe = ttk.LabelFrame(self.root, text="Bienvenue", padding="10px")
         labelframe.pack(side=tk.TOP, expand=1, fill=tk.BOTH, padx=10, pady=10)
 
+        # Initialisation des FileEntry
         self.src_pathentry = FileEntry(labelframe, label="Dossier source : ")
         self.dest_pathentry = FileEntry(labelframe, label="Dossier destination : ")
 
         self.src_pathentry.pack(expand=0, fill=tk.X, pady=5)
         self.dest_pathentry.pack(expand=0, fill=tk.X, pady=5)
 
+        # Label de status et barre de progression
         status_frame = ttk.LabelFrame(labelframe, text="Statut", padding="10px")
         status_frame.pack(side=tk.BOTTOM, expand=1, fill=tk.X, padx=5, pady=5)
-
         self.status_label = ttk.Label(status_frame, text="Prêt")
         self.status_label.pack(side=tk.LEFT, expand=1, fill=tk.X)
-
         self.progress_bar = ttk.Progressbar(status_frame, mode='indeterminate')
         self.progress_bar.pack(side=tk.LEFT, expand=1, fill=tk.X, padx=5)
 
+        # Checkbox pour la mediane
         flou_frame = ttk.Frame(labelframe)
         flou_frame.pack(side=tk.TOP, expand=0, fill=tk.X, padx=5)
 
@@ -95,17 +100,28 @@ class MainApplication:
         flou_checkbox = ttk.Checkbutton(flou_frame, text="Appliquer une médiane", variable=self.flou_var, command=toggle_blur_entry)
         flou_checkbox.pack(expand=0, fill=tk.X)
         
+        #Initialisation des RadioButton
+        method_frame = ttk.Frame(labelframe)
+        method_frame.pack(side=tk.TOP, expand=0, fill=tk.X, padx=5)
 
-        meta_frame = ttk.Frame(labelframe)
-        meta_frame.pack(side=tk.TOP, expand=0, fill=tk.X, padx=5)
+        self.method_value = tk.StringVar()
+        self.method_value.set('meta')
 
-        self.meta_var = tk.BooleanVar(value=True)
-        meta_checkbox = ttk.Checkbutton(meta_frame, text="Utiliser Metashape", variable=self.meta_var)
-        meta_checkbox.pack(expand=0, fill=tk.X)
+        #Choix pour Metashape
+        meta_button = ttk.Radiobutton(method_frame, text="Metashape", variable=self.method_value,value="meta")
+        meta_button.pack(expand=0, fill=tk.X)
+
+        #Choix pour stitch
+        stitch_button = ttk.Radiobutton(method_frame, text="Stitch", variable=self.method_value,value="stitch")
+        stitch_button.pack(expand=0, fill=tk.X)
+
+        #Choix pour micmac
+        micmac_button = ttk.Radiobutton(method_frame, text="Micmac", variable=self.method_value,value="micmac")
+        micmac_button.pack(expand=0, fill=tk.X)
 
 
 
-
+        #Affichage de la frame et initialisation du FileTreeApp
         file_tree_frame = ttk.Frame(self.root)
         file_tree_frame.pack(side=tk.BOTTOM, expand=1, fill=tk.BOTH, padx=10, pady=10)
         self.file_tree_app = FileTreeApp(file_tree_frame)
@@ -135,6 +151,9 @@ class MainApplication:
         Ouvre la fenetre de calcul en fonction du mode : add ou applique
         """
         def on_select(calculs):
+            """
+            Utilise ImageRasterCalculator pour effectuer le calcul sur les images
+            """
             orthos_path = self.file_tree_app.base_path
             calculator = ImageRasterCalculator(orthos_path)
             for calcul in calculs:

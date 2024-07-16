@@ -29,7 +29,7 @@ class FileTreeApp:
         self.canvas.bind("<Button-5>", self.zoom_image)  # Scroll down
         self.canvas.bind("<Double-Button-1>", self.reset_zoom)
 
-        # Ajouter un bouton pour ouvrir un dossier
+        # Ajouter un bouton pour ouvrir l'explorateur de fichier
         self.open_button = ttk.Button(self.tree_frame, text="Ouvrir", command=self.open_folder)
         self.open_button.pack(side='bottom', pady=10)
 
@@ -90,18 +90,18 @@ class FileTreeApp:
         Affiche l'image
         """
         try:
-            # Load original image
+            # Charge l'image originale
             original_image = Image.open(path)
 
-            # Resize original image if it exceeds frame dimensions
+            # Redimensionne l'image originale si sa taille excede la taille de la Frame
             frame_width = self.image_frame.winfo_width()
             frame_height = self.image_frame.winfo_height()
 
             if original_image.width > frame_width or original_image.height > frame_height:
                 original_image.thumbnail((frame_width, frame_height))
 
-            self.original_image = original_image  # Save original image for zooming
-            self.current_image = original_image.copy()  # Save a copy for display
+            self.original_image = original_image  # Sauvegarde l'image originale pour le zoom
+            self.current_image = original_image.copy()  # Sauvegarde une copie pour l'affichage
             self.zoom_factor = 1.0  # Reset zoom factor
             self.show_image(original_image)
 
@@ -109,7 +109,7 @@ class FileTreeApp:
             self.canvas.create_text(self.canvas.winfo_width()/2, self.canvas.winfo_height()/2, text=str(e))
 
     def show_image(self, image):
-        # Convert Image to PhotoImage and display on canvas
+        # Convertit l'image en PhotoImage pour l'afficher dans le canvas
         photo = ImageTk.PhotoImage(image)
         self.canvas.image = photo  # Keep a reference to prevent garbage collection
         self.canvas.delete("all")
@@ -120,30 +120,29 @@ class FileTreeApp:
         """
         Permet de zoomer sur l'image avec la molette de la souris
         """
-        # Calculate zoom factor based on mouse wheel or button clicks
+        # Calcul le facteur de zoom
         if event.num == 4 or event.delta > 0:  # Scroll up
             self.zoom_factor *= 1.1
         elif event.num == 5 or event.delta < 0:  # Scroll down
             self.zoom_factor /= 1.1
 
-        # Limit zoom factor to a reasonable range
+        # Limiter le facteur de zoom à une plage raisonnable
         self.zoom_factor = min(max(self.zoom_factor, 0.1), 10.0)
 
-        # Get current mouse position relative to the canvas
+        # Récupérer la position actuelle de la souris sur le canvas
         mouse_x = self.canvas.canvasx(event.x)
         mouse_y = self.canvas.canvasy(event.y)
 
-        # Calculate the new width and height based on zoom factor
+        # Calcule la nouvelle largeur et hauteur basées sur le facteur de zoom
         new_width = int(self.original_image.width * self.zoom_factor)
         new_height = int(self.original_image.height * self.zoom_factor)
 
-        # Resize the image
+        # Redimensionne l'image
         resized_image = self.original_image.resize((new_width, new_height))
 
-        # Display the resized image
         self.show_image(resized_image)
 
-        # Adjust the canvas view to center around the mouse position
+        # Ajuste la vue du canvas pour qu'elle soit centrée autour de la position de la souris.
         self.canvas.xview_moveto(mouse_x / new_width)
         self.canvas.yview_moveto(mouse_y / new_height)
 
@@ -153,7 +152,7 @@ class FileTreeApp:
         """
         # Reset zoom factor to 1.0 (original size)
         self.zoom_factor = 1.0
-        # Redisplay the original image
+        # Réaffiche l'image originale
         self.show_image(self.original_image)
 
 
@@ -161,8 +160,11 @@ class FileTreeApp:
         """
         Met à jour le chemin de l'arbre et peple l'arbre avec ce chemin
         """
+        #Enregistre le nouveau chemin de base
         self.base_path=base_path
+        #Supprime l'ancienne arborescence
         self.tree.delete(*self.tree.get_children())
+        #Peuple l'arbre avec le nouveau chemin
         if os.path.isdir(base_path):
             self.populate_tree(base_path)
 

@@ -37,10 +37,10 @@ def recadrage(T):
     T (list): Liste des images.
 
     Returns:
-    int: Nombre de pixels à gauche.
-    int: Nombre de pixels à droite.
-    int: Nombre de pixels en haut.
-    int: Nombre de pixels en bas.
+    int l: Nombre de pixels à gauche.
+    int r: Nombre de pixels à droite.
+    int t: Nombre de pixels en haut.
+    int b: Nombre de pixels en bas.
     """
     left = [0]
     right = [0]

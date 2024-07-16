@@ -44,7 +44,7 @@ def traitement(doc:Metashape.Document,folders_path:str):
 
 
         # Construire un nuage de points dense
-        chunk.buildDepthMaps(downscale=4,filter_mode = Metashape.AggressiveFiltering)
+        chunk.buildDepthMaps(downscale=4,filter_mode = Metashape.MildFiltering)
 
 
         # Construire un maillage

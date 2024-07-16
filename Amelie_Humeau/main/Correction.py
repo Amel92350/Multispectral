@@ -18,7 +18,6 @@ def Openimage(path):
     return img, path_b
 
 def convert12to8(img):
-    print("Conversion")
     """
     Fonction qui prend en argument une matrice représentant une
     image et qui renvoie une matrice qui représente l'image en 8 bits
@@ -37,6 +36,7 @@ def get_file_matrice(bande):
     ENTREE : une chaîne de caractères (bande) qui contient la bande dont on veut les matrices (ex : '450nm')
     SORTIE : deux matrices dans un tuple (dist, mtx)
     """
+    #Initialisation des matrices à 0
     dist = np.zeros((1, 5))
     mtx = np.zeros((3, 3))
     
@@ -74,9 +74,11 @@ def undistort_bande(img_bande, mtx, dist, roi, new_camera_mtx):
     :param new_camera_mtx: Nouvelle matrice de la caméra après correction
     """
     for img, path in img_bande:
+        #corrige la distorsion en fonction des nouveaux paramètres de calibration
         dst = cv.undistort(img, mtx, dist, None, new_camera_mtx)
         dst = convert12to8(dst)
         x, y, w, h = roi
+        #rogne l'image pour retirer les bords noirs de la correction
         dst = dst[y:y + h, x:x + w]
         cv.imwrite(path, dst)
 
@@ -84,7 +86,7 @@ def undistort_bande(img_bande, mtx, dist, roi, new_camera_mtx):
 def main(chemin):
     """
     Fonction principale qui gère le processus de correction des images.
-    :param chemin: Chemin absolu du dossier contenant les images, suivi de /*/*.tif
+    :param chemin: Chemin absolu du dossier contenant les images, suivi de /*
     """
     print(chemin)
     images = glob.glob(os.path.join(chemin, "*.tif"))
@@ -111,4 +113,4 @@ def main(chemin):
         undistort_bande(images_dict[bande], mtx, dist, roi, new_camera_mtx)
 
 if __name__ == "__main__":
-    main("C:/Users/AHUMEAU/Desktop/test/copied_images/*")
+    help(undistort_bande)
