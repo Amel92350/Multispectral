@@ -5,3 +5,4 @@ pillow==10.3.0
 imutils==0.5.4
 tkScrolledFrame==1.0.4
 ttkthemes==3.2.2
+pyinstaller==6.8.0
