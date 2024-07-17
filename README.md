@@ -30,18 +30,18 @@ Ce repository contient le code source d'un logiciel de traitement d'images multi
    ```
    
 2. Installez les dépendances nécessaires à l'aide de la commande `pip install -r requirements.txt`
-3. 
-4. **Téléchargez Agisoft Metashape Pro :**  Téléchargez Agisoft Metashape Professional depuis [le site officiel de Metashape](https://www.agisoft.com/downloads/installer/).
-5. 
-6. **Télécharger du module Python Metashape :** Téléchargez le module python de Metashape depuis le même site.
-7. 
-8. **Installez le module :** Installez le module python à l'aide de `pip` : 
+  
+3. **Téléchargez Agisoft Metashape Pro :**  Téléchargez Agisoft Metashape Professional depuis [le site officiel de Metashape](https://www.agisoft.com/downloads/installer/).
+  
+4. **Télécharger du module Python Metashape :** Téléchargez le module python de Metashape depuis le même site.
+  
+5. **Installez le module :** Installez le module python à l'aide de `pip` : 
      ```batch
      pip install Metashape-2.1.2-cp37.cp38.cp39.cp310.cp311-none-win_amd64.whl
      ```
      par exemple en remplaçant le nom du module avec celui que vous avez téléchargé
    
-10. **Pour installer l'exécutable**, modifiez la ligne : binaries=[('C:\\Users\\AHUMEAU\\AppData\\Local\\Programs\\Python\\Python311\\DLLs', '.')] du fichier main.spec en remplaçant le chemin par votre chemin vers python\\DLLs.
+6. **Pour installer l'exécutable**, modifiez la ligne : binaries=[('C:\\Users\\AHUMEAU\\AppData\\Local\\Programs\\Python\\Python311\\DLLs', '.')] du fichier main.spec en remplaçant le chemin par votre chemin vers python\\DLLs.
    Ensuite exécutez la commande :
    ```batch
    pyinstaller main.spec
