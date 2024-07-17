@@ -24,29 +24,34 @@ Ce repository contient le code source d'un logiciel de traitement d'images multi
 ## Installation
 
 1. Clonez le repository à l'aide de la commande `git clone https://github.com/Amel92350/Multispectral.git`
+   Pour se déplacer dans le dossier contenant le fichier 'main.py':
+   ```batch
+   cd Multispectral/Amelie_Humeau/main
+   ```
 2. Installez les dépendances nécessaires à l'aide de la commande `pip install -r requirements.txt`
-
-## Utilisation
-
-Pour exécuter ce logiciel, assurez-vous d'avoir installé les dépendances Python spécifiées. De plus, le logiciel utilise l'API Metashape pour certaines fonctionnalités. Voici comment configurer l'environnement :
-
-1. **Téléchargez Agisoft Metashape Pro :**  Téléchargez Agisoft Metashape Professional depuis [le site officiel de Metashape](https://www.agisoft.com/downloads/installer/).
-
-2. **Télécharger du module Python Metashape :** Téléchargez le module python de Metashape depuis le même site.
-
-3. **Installez le module :** Installez le module python à l'aide de `pip` : 
-
+3. **Téléchargez Agisoft Metashape Pro :**  Téléchargez Agisoft Metashape Professional depuis [le site officiel de Metashape](https://www.agisoft.com/downloads/installer/).
+4. **Télécharger du module Python Metashape :** Téléchargez le module python de Metashape depuis le même site.
+5. **Installez le module :** Installez le module python à l'aide de `pip` : 
      ```batch
      pip install Metashape-2.1.2-cp37.cp38.cp39.cp310.cp311-none-win_amd64.whl
      ```
      par exemple en remplaçant le nom du module avec celui que vous avez téléchargé
-   
-4. **Lancement du logiciel :** Une fois l'environnement configuré, exécutez le logiciel à l'aide de la commande :
+6. **Pour installer l'exécutable**, modifiez la ligne : binaries=[('C:\\Users\\AHUMEAU\\AppData\\Local\\Programs\\Python\\Python311\\DLLs', '.')] du fichier main.spec en remplaçant le chemin par votre chemin vers python\\DLLs.
+   Ensuite exécutez la commande :
+   ```batch
+   pyinstaller main.spec
+   ```
+  
+## Utilisation
+  
+**Lancement du logiciel :** Une fois l'environnement configuré, exécutez le logiciel à l'aide de la commande :
 
    ```bash
    python main.py
 
-  Assurez-vous d'utiliser Python 3.11 ou une version supérieure pour exécuter le logiciel.
+Assurez-vous d'utiliser Python 3.11 ou une version supérieure pour exécuter le logiciel.
+
+**Ou** lancez l'exécutable créé dans dist/main
 
 
 ## Auteurs
