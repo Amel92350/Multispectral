@@ -48,7 +48,7 @@ Ce repository contient le code source d'un logiciel de traitement d'images multi
 
    ```bash
    python main.py
-
+   ```
 Assurez-vous d'utiliser Python 3.11 ou une version supérieure pour exécuter le logiciel.
 
 **Ou** lancez l'exécutable créé dans dist/main
