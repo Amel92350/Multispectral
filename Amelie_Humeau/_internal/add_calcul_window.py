@@ -37,7 +37,7 @@ class AddCalculWindow:
         """
         current_dir = os.path.dirname(os.path.abspath(__file__))
         root_dir = os.path.dirname(current_dir)
-        calc_dir = os.path.join(root_dir, 'main', 'calculs')
+        calc_dir = os.path.join(root_dir, '_internal', 'calculs')
         return calc_dir
 
     def init_styles(self):
