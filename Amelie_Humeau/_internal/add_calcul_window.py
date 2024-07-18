@@ -197,7 +197,4 @@ class AddCalculWindow:
             messagebox.showerror("Erreur", f"Le fichier '{filename}' n'existe pas.")
 
 if __name__ == "__main__":
-
-    def somme(a,b):
-        return a+b
-    print(type(somme))    
+    print("test")

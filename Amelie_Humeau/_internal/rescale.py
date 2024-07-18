@@ -48,6 +48,7 @@ def recadrage(T):
     bottom = [0]
 
     for image in T:
+        print(image.shape)
         w, h = image.shape
         pixels_left = 0
         pixels_right = 0
@@ -230,7 +231,7 @@ def main(path,onedir = False,flou = None,recadre=False):
         images = glob.glob(path+ "/*.tif")
         print(images)
         resize_images_to_common_dimensions(images)
-        align_img(images,flou,recadre=recadre)        
+        #align_img(images,flou,recadre=recadre)        
 
         return 0
     files = glob.glob(path)
@@ -239,7 +240,7 @@ def main(path,onedir = False,flou = None,recadre=False):
         images = glob.glob(file+"/*.tif")
         if images:
             resize_images_to_common_dimensions(images)
-            align_img(images,kernel=None,recadre=True)
+            #align_img(images,kernel=None,recadre=True)
 
 if __name__ == "__main__" : 
     main("C:\\Users\\AHUMEAU\\Desktop\\test_expo\\test_10000\\orthos",onedir = True)

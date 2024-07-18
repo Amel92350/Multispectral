@@ -50,12 +50,14 @@ def get_file_matrice(bande):
         data_dist = f_dist.readlines()
         data_mtx = f_mtx.readlines()
 
+        #Récupère les données dans data_dist pour les mettre dans dist
         for i, line_name in enumerate(data_dist):
             if line_name.strip() == bande:
                 for line in data_dist[i + 1:i + 6]:
                     indice1, indice2, value = line.strip().split(' ')
                     dist[int(indice1), int(indice2)] = float(value)
-
+                    
+        #Récupère les données dans data_mtx pour les mettre dans mtx
         for i, line_name in enumerate(data_mtx):
             if line_name.strip() == bande:
                 for line in data_mtx[i + 1:i + 6]:

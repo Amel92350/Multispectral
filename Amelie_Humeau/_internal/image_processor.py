@@ -147,13 +147,19 @@ class ImageProcessor:
         self.update_status("Création des orthomosaïques en cours...", "Démarrage de la création des orthomosaïques.")
 
         #On va lancer la méthode Stitch, Metashape ou Micmac en fonction du bouton coché.
-        if method_value=="meta":
-            meta.main(path)
-        elif method_value=="stitch":
-            stitch.main(path)
-        elif method_value=="micmac":
-            # TODO : Ici faire appel à la fonction principale de traitement d'un fichier micmac.py
-            raise ValueError("Erreur, Micmac n'est pas initialisé")
+        match method_value:
+            case "meta" : 
+                meta.main(path)
+                pass
+
+            case "stitch":
+                stitch.main(path)
+                pass
+            
+            case "micmac":
+                # TODO : Ici faire appel à la fonction principale de traitement d'un fichier micmac.py
+                raise ValueError("Erreur, Micmac n'est pas initialisé")
+
 
         self.update_status("Alignement en cours...", "Démarrage de l'alignement.")
         rescale.main(os.path.join(path, "orthos"), onedir=True, flou=blur_value)
