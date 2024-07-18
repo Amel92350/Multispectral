@@ -42,8 +42,9 @@ Ce repository contient le code source d'un logiciel de traitement d'images multi
      par exemple en remplaçant le nom du module avec celui que vous avez téléchargé
    
 6. **Pour installer l'exécutable**, modifiez les chemins du fichier main.spec en les remplaçant votre chemin vers le clone de git.
-   Ensuite exécutez la commande :
+   Ensuite exécutez :
    ```batch
+   cd Amelie_Humeau/_internal
    pyinstaller main.spec
    ```
   
