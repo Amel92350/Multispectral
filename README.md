@@ -24,9 +24,9 @@ Ce repository contient le code source d'un logiciel de traitement d'images multi
 ## Installation
 
 1. Clonez le repository à l'aide de la commande `git clone https://github.com/Amel92350/Multispectral.git`
-   Pour se déplacer dans le dossier contenant le fichier 'main.py':
+   Se déplacer
    ```batch
-   cd Multispectral/Amelie_Humeau/_internal
+   cd Multispectral
    ```
    
 2. Installez les dépendances nécessaires à l'aide de la commande `pip install -r requirements.txt`
@@ -41,7 +41,7 @@ Ce repository contient le code source d'un logiciel de traitement d'images multi
      ```
      par exemple en remplaçant le nom du module avec celui que vous avez téléchargé
    
-6. **Pour installer l'exécutable**, modifiez la ligne : binaries=[('C:\\Users\\AHUMEAU\\AppData\\Local\\Programs\\Python\\Python311\\DLLs', '.')] du fichier main.spec en remplaçant le chemin par votre chemin vers python\\DLLs.
+6. **Pour installer l'exécutable**, modifiez les chemins du fichier main.spec en les remplaçant votre chemin vers le clone de git.
    Ensuite exécutez la commande :
    ```batch
    pyinstaller main.spec
