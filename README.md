@@ -35,7 +35,7 @@ Ce repository contient le code source d'un logiciel de traitement d'images multi
   
 4. **Télécharger du module Python Metashape :** Téléchargez le module python de Metashape depuis le même site.
   
-5. **Installez le module :** Installez le module python à l'aide de `pip` : 
+5. **Installez le module :** Installez le module python à l'aide de `pip` (en vous déplaçant dans le dossier où se trouve le module) : 
      ```batch
      pip install Metashape-2.1.2-cp37.cp38.cp39.cp310.cp311-none-win_amd64.whl
      ```
